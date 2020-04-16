@@ -6,7 +6,7 @@ from flask_login import login_required
 from flask import request
 from werkzeug.urls import url_parse
 from app import db
-from app.forms import RegistrationForm, classCreation, LoginForm, joinClass
+from app.forms import *
 from flask_login import logout_user
 
 
@@ -43,36 +43,12 @@ def logout():
 @app.route('/dash', methods=['GET', 'POST'])
 @login_required
 def dash():
-    createClassForm = classCreation()
-
-    #Creates class from submit
-    if createClassForm.validate_on_submit() and createClassForm.submit1.data:
-        classObj = Class.query.filter_by(
-            name=createClassForm.className.data).first()
-        if classObj is None:
-            current_user.classes.append(
-                Class(name=createClassForm.className.data))
-            flash("Class created")
-            db.session.commit()
-        else:
-            flash("Class name already Exists")
-        return redirect(url_for("dash"))
-
-    #Join user to class from form submit
-    joinClassForm = joinClass()
-    if joinClassForm.validate_on_submit() and joinClassForm.submit2.data:
-        classObj = Class.query.filter_by(name=joinClassForm.className.data).first()
-        if classObj is None:
-            flash("Class does not exist!")
-        else:
-            classObj.members.append(current_user)
-            db.session.commit()
-            flash("You have joined " + classObj.name)
-            return redirect(url_for("dash"))
-    if str(current_user.roles) == "[teacher]":
-        return render_template("teacherDash.html", createClassForm=createClassForm, joinClassForm=joinClassForm)
+    if str(current_user.roles) == "[admin]":
+        return render_template("adminDash.html")
+    elif str(current_user.roles) == "[user]":
+        return render_template("userDash.html")
     else:
-        return render_template("studDash.html", joinClassForm=joinClassForm)
+        return render_template("viewDash.html")
 
 
 @app.route("/profile")
@@ -87,26 +63,30 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        studRole = Role.query.filter_by(name="student").first()
-        if studRole is None:
-            studRole = Role(name="student")
-            db.session.add(studRole)
-        teachRole = Role.query.filter_by(name="teacher").first()
-        if teachRole is None:
-            teachRole = Role(name="teacher")
-            db.session.add(teachRole)
 
+        userRole = Role.query.filter_by(name="user").first()
+        if userRole is None:
+            userRole = Role(name="user")
+            db.session.add(userRole)
+        adminRole = Role.query.filter_by(name="admin").first()
+        if adminRole is None:
+            adminRole = Role(name="admin")
+            db.session.add(adminRole)
+        viewRole = Role.query.filter_by(name="view").first()
+        if viewRole is None:
+            viewRole = Role(name="view")
+            db.session.add(viewRole)
 
-        if form.teacher.data == True:
-            user = User(username=form.username.data,
-                        email=form.email.data, userFullName=form.userFullName.data)
-            user.set_password(form.password.data)
-            teachRole.users.append(user)
+        user = User(username=form.username.data,email=form.email.data, userFullName=form.userFullName.data)
+        user.set_password(form.password.data)
+
+        if form.admin.data == True:
+            adminRole.users.append(user)
+        elif form.user.data == True:
+            userRole.users.append(user)
         else:
-            user = User(username=form.username.data,
-                        email=form.email.data, userFullName=form.userFullName.data)
-            user.set_password(form.password.data)
-            studRole.users.append(user)
+            viewRole.users.append(user)
+        
         db.session.add(user)
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
@@ -114,25 +94,6 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route("/leaveClass/<lClass>")
-def leaveClass(lClass):
-    keepClasses = []
-    for c in current_user.classes:
-        if str(c) == lClass:
-            continue
-        else:
-            keepClasses.append(c)
-    current_user.classes = keepClasses
-    db.session.commit()
-    return redirect(url_for("dash"))
-
-
-@app.route("/deleteClass/<rmClass>")
-def deleteClass(rmClass):
-    classObj = Class.query.filter_by(name=rmClass).first()
-    db.session.delete(classObj)
-    db.session.commit()
-    return redirect(url_for("dash"))
 
 @app.route("/deleteAccount/<username>")
 def deleteAccount(username):

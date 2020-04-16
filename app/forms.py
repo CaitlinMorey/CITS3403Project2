@@ -17,7 +17,9 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])
-    teacher = BooleanField('Teacher')
+    admin = BooleanField('Admin')
+    user = BooleanField('User')
+    view = BooleanField('View')
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -30,10 +32,3 @@ class RegistrationForm(FlaskForm):
         if user is not None:
             raise ValidationError('Please use a different email address.')
 
-class classCreation(FlaskForm):
-    className = StringField('Class Name', validators=[DataRequired()])
-    submit1 = SubmitField('Create')
-
-class joinClass(FlaskForm):
-    className = StringField('Class Name', validators=[DataRequired()])
-    submit2 = SubmitField('Join')

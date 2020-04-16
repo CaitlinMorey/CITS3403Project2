@@ -41,7 +41,10 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.teacher() }} {{ form.teacher.label }}</p>
+        Please only select one of the following types of users:
+        <p>{{ form.admin() }} {{ form.admin.label }}
+        {{ form.user() }} {{ form.user.label }}
+        {{ form.view() }} {{ form.view.label }}</p>
         <p>{{ form.submit() }}</p>
     </form>
 </div>
