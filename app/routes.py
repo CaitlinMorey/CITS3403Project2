@@ -29,7 +29,7 @@ def login():
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
+            next_page = url_for('dash')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
@@ -43,12 +43,13 @@ def logout():
 @app.route('/dash', methods=['GET', 'POST'])
 @login_required
 def dash():
+    quizzes = Quiz.query.all()
     if str(current_user.roles) == "[admin]":
         return render_template("adminDash.html")
     elif str(current_user.roles) == "[user]":
-        return render_template("userDash.html")
+        return render_template("userDash.html", quizzes=quizzes)
     else:
-        return render_template("viewDash.html")
+        return render_template("viewDash.html", quizzes=quizzes)
 
 
 @app.route("/profile")
@@ -101,3 +102,9 @@ def deleteAccount(username):
     db.session.delete(userObj)
     db.session.commit()
     return redirect(url_for("profile"))
+
+
+@app.route("/takeQuiz/<quizName>/")
+def takeQuiz(quizName):
+    quiz = Quiz.query.filter_by(quizName=quizName).first()
+    return render_template('quizAttempt.html', quiz=quiz)

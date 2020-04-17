@@ -3,7 +3,7 @@
 {%block content%}
 
 <div class="jumbotron" style="text-align: center; margin-top: 5%;">
-    <h1> This is the Overview Dashboard </h1>
+    <h1> This is the User Dashboard </h1>
     <p>Welcome, {{ current_user.username }}!<br>
 
         <br>
@@ -13,21 +13,13 @@
             {%for quiz in quizzes:%}
             <li>Title : {{quiz.quizName}} </li>
             <li>Description: {{quiz.quizDescription}} </li>
-            <li>Questions:</li>
-            <ul>
-                {%for question in quiz.questions%}
-                <li>Question: {{question}} </li>
-                <li>Answer: {{question.answer}}
-                {%endfor%}
-            </ul>
+            <li><a href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a>
             {%endfor%}
-        </ul>
-        <br>
-        <hr>    
+        <hr>
         <a href="{{ url_for('profile')}}"> Profile </a>
     </p>
-    
-    
+
+
 </div>
 
 {%endblock%}
