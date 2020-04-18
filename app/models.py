@@ -19,6 +19,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     quizzes = db.relationship('Quiz', backref='author', lazy='dynamic')
     roles = db.relationship('Role', secondary=userRoles, backref=db.backref('users', lazy='dynamic'))
+
+    #quizAttempts = db.relationship('quizAttempt', backref='user', lazy='dynamic')
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -49,6 +52,10 @@ class Quiz(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     questions = db.relationship('quizQuestions', backref='quiz')
+
+    #quizAttempt = db.relationship('quizAttempt', backref='quizAttempted')
+
+
     def __repr__(self):
         return '{}'.format(self.quizName)
 
@@ -58,9 +65,11 @@ class quizQuestions(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     img = db.Column(db.String(140))
     answer = db.relationship('quizAnswers', backref='question', uselist=False)
+
+    #quesAttempt = db.relationship('quizAttempt', backref='quesAttempted')
+
     def __repr__ (self):
         return '{}'.format(self.question)
-
 
 class quizAnswers(db.Model):
     id = db.Column(db.Integer, primary_key=True)

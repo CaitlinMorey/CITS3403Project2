@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, FieldList, FormField, Form
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import User
 
@@ -31,4 +31,15 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Please use a different email address.')
+
+class quesAndAnswer(Form):
+    quizQuestions = StringField("Question", validators=[DataRequired()])
+    quizAnswers = StringField("Answer", validators=[DataRequired()])
+
+class quizCreation(FlaskForm):
+    quizName = StringField("Quiz Name: ", validators=[DataRequired()])
+    quizDescription = StringField("Quiz Description: ")
+    question = FieldList(FormField(quesAndAnswer), min_entries=1)
+    submit = SubmitField('Create')
+
 

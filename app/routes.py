@@ -108,3 +108,20 @@ def deleteAccount(username):
 def takeQuiz(quizName):
     quiz = Quiz.query.filter_by(quizName=quizName).first()
     return render_template('quizAttempt.html', quiz=quiz)
+
+@app.route("/createQuiz", methods=['GET', 'POST'])
+def createQuiz():
+    form = quizCreation()
+    if form.validate_on_submit():
+        print("hello")
+        print(form.quizName.data)
+        print(form.quizDescription.data)
+        print(form.question.data)
+        for quiz in form.question.data:
+            print(quiz["quizQuestions"], quiz["quizAnswers"])
+        #quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
+
+    else:
+        print(form.errors)
+    return render_template("quizCreation.html", form=form)
+
