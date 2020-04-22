@@ -20,7 +20,7 @@ class User(UserMixin, db.Model):
     quizzes = db.relationship('Quiz', backref='author', lazy='dynamic')
     roles = db.relationship('Role', secondary=userRoles, backref=db.backref('users', lazy='dynamic'))
 
-    #quizAttempts = db.relationship('quizAttempt', backref='user', lazy='dynamic')
+    quizAttempts = db.relationship('quizAttempts', backref='user', lazy='dynamic',  cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -51,9 +51,9 @@ class Quiz(db.Model):
     quizDescription = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    questions = db.relationship('quizQuestions', backref='quiz')
+    questions = db.relationship('quizQuestions', backref='quiz', cascade="all, delete-orphan")
 
-    #quizAttempt = db.relationship('quizAttempt', backref='quizAttempted')
+    quizAttempt = db.relationship('quizAttempts', backref='quizAttempted', lazy='dynamic',  cascade="all, delete-orphan")
 
 
     def __repr__(self):
@@ -63,10 +63,10 @@ class quizQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(140))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
-    img = db.Column(db.String(140))
-    answer = db.relationship('quizAnswers', backref='question', uselist=False)
+    quesType = db.Column(db.String(10))
+    answer = db.relationship('quizAnswers', backref='question', cascade="all, delete-orphan")
 
-    #quesAttempt = db.relationship('quizAttempt', backref='quesAttempted')
+    quesAttempt = db.relationship('quizAttempts', backref='quesAttempted', lazy='dynamic',  cascade="all, delete-orphan")
 
     def __repr__ (self):
         return '{}'.format(self.question)
@@ -78,7 +78,7 @@ class quizAnswers(db.Model):
     def __repr__ (self):
         return '{}'.format(self.answer)
 
-class quizAttempt(db.Model):
+class quizAttempts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))

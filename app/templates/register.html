@@ -41,10 +41,7 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        Please only select one of the following types of users:
-        <p>{{ form.admin() }} {{ form.admin.label }}
-        {{ form.user() }} {{ form.user.label }}
-        {{ form.view() }} {{ form.view.label }}</p>
+        <p>User type: {{ form.userType}}</p>
         <p>{{ form.submit() }}</p>
     </form>
 </div>

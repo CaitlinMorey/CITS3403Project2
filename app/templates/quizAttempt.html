@@ -1,26 +1,36 @@
 {%extends "base.html"%}
 
 {%block content%}
+<style>
 
+</style>
 <div class="jumbotron" style="text-align: center; margin-top: 5%;">
     <h2>Title : {{quiz.quizName}}</h2>
     <h3>Description: {{quiz.quizDescription}} </h3>
-    <p>Good luck, {{ current_user.username }}!<br>
-    
+    <p>Good luck, {{ current_user.username }}! </p><br>
+    <div style="text-align: left;">
         <br>
         <hr>
-        <ul style="list-style-type:none; text-align: left;">
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+        <li>Questions:</li>
+            
+        <br> {%for ques in range(1, quiz.questions|length + 1)%}
+                {{quiz.questions[ques -1]}} <br>
+                {{form['ques' + ques|string].label}} <br>
+                {{form['ques' + ques|string]}}
+                <br>
+             {%endfor%}
+            {{form.submit}}
+        </form>
+    </div>
 
-            <li>Questions:</li>
-            <ul>
-                {%for question in quiz.questions%}
-                <li>Question: {{question}} </li>
-                {%endfor%}
-            </ul>
-        
-    </p>
+
 
 
 </div>
 
+<script>
+
+</script>
 {%endblock%}

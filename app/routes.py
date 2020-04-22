@@ -8,6 +8,7 @@ from werkzeug.urls import url_parse
 from app import db
 from app.forms import *
 from flask_login import logout_user
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 
 
 @app.route('/')
@@ -44,10 +45,11 @@ def logout():
 @login_required
 def dash():
     quizzes = Quiz.query.all()
+    attempts = quizAttempts
     if str(current_user.roles) == "[admin]":
-        return render_template("adminDash.html")
+        return render_template("adminDash.html", quizzes=quizzes)
     elif str(current_user.roles) == "[user]":
-        return render_template("userDash.html", quizzes=quizzes)
+        return render_template("userDash.html", quizzes=quizzes, quizAttempts=attempts)
     else:
         return render_template("viewDash.html", quizzes=quizzes)
 
@@ -80,10 +82,10 @@ def register():
 
         user = User(username=form.username.data,email=form.email.data, userFullName=form.userFullName.data)
         user.set_password(form.password.data)
-
-        if form.admin.data == True:
+        print(form.userType.data)
+        if form.userType.data == "admin":
             adminRole.users.append(user)
-        elif form.user.data == True:
+        elif form.userType.data == "user":
             userRole.users.append(user)
         else:
             viewRole.users.append(user)
@@ -103,11 +105,41 @@ def deleteAccount(username):
     db.session.commit()
     return redirect(url_for("profile"))
 
+@app.route("/deleteQuiz/<quizName>")
+def deleteQuiz(quizName):
+    quizObj = Quiz.query.filter_by(quizName=quizName).first()
+    db.session.delete(quizObj)
+    db.session.commit()
+    return redirect(url_for("dash"))
 
-@app.route("/takeQuiz/<quizName>/")
+
+@app.route("/takeQuiz/<quizName>/", methods=['GET', 'POST'])
 def takeQuiz(quizName):
     quiz = Quiz.query.filter_by(quizName=quizName).first()
-    return render_template('quizAttempt.html', quiz=quiz)
+    form = quizAttempt()
+
+    #Add answer type to each question
+    for ques in range(0, len(quiz.questions)):
+        if quiz.questions[ques].quesType == "shortAns":
+            setattr(quizAttempt, "ques"+str(ques + 1), StringField("Answer:"))    
+        if quiz.questions[ques].quesType == "longAns":
+            setattr(quizAttempt, "ques"+str(ques + 1), TextAreaField("Answer:",  render_kw={"rows": 20, "cols": 50}))
+
+    if form.validate_on_submit():
+        for ques in range(0, len(quiz.questions)):
+            if str(quiz.questions[ques].answer[0]) != "":
+                if str(quiz.questions[ques].answer[0]) in form.data["ques" + str(ques+1)]:
+                    mark = 1
+                else:
+                    mark = 0    
+            else:
+                mark=None
+            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], ansSubmit=form.data["ques" + str(ques+1)], mark=mark)
+            db.session.add(attempt)
+            db.session.commit()
+        print(form.data)
+        print("submitted")
+    return render_template('quizAttempt.html', quiz=quiz, form=form)
 
 @app.route("/createQuiz", methods=['GET', 'POST'])
 def createQuiz():
@@ -117,11 +149,16 @@ def createQuiz():
         print(form.quizName.data)
         print(form.quizDescription.data)
         print(form.question.data)
-        for quiz in form.question.data:
-            print(quiz["quizQuestions"], quiz["quizAnswers"])
-        #quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
-
+        quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
+        for ques in form.question.data:
+             print(ques["quesType"], ques["quizQuestion"], ques["quizAnswer"])
+             newQuestion = quizQuestions(question=ques["quizQuestion"], quesType=ques["quesType"], quiz=quiz)
+             newAnswer = quizAnswers(answer=ques["quizAnswer"], question=newQuestion)
+             db.session.commit()
+        return redirect(url_for("dash"))
     else:
         print(form.errors)
     return render_template("quizCreation.html", form=form)
+
+
 

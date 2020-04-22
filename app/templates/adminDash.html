@@ -6,9 +6,17 @@
     <h1 style="text-align: center;"> This is the Admin Dashboard </h1>
     <p>Welcome, {{ current_user.username }}!</p>
     <br>
-
+    <h4>Quizzes</h4>
+        <ul style="list-style-type:none; text-align: left;">
+            {%for quiz in quizzes:%}
+            <li>Title : {{quiz.quizName}} </li>
+            <li>Description: {{quiz.quizDescription}} </li>
+            <li><a href="{{ url_for('deleteQuiz', quizName=quiz) }}"> Delete </a></li>
+            {%endfor%}
+        
+    <br><br>
     <p><a href="{{ url_for('createQuiz')}}"> Create Quiz</a></p>
-
+    <a href="{{ url_for('profile')}}"> Profile </a>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     <ul style="list-style-type:none;">

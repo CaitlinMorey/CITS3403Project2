@@ -9,22 +9,23 @@
 
     <form id="quiz-form" action="" method="post">
         {{ form.hidden_tag() }}
-        {{ form.csrf_token() }}
 
         <p> {{ form.quizName.label }} {{ form.quizName(size=10) }} </p>
         <p> {{ form.quizDescription.label }} {{ form.quizDescription(size=10) }} </p>
         <br>
-
-
         <div id="subforms-container">
             {% for subform in form.question %}
             <div id="quiz-{{ loop.index0 }}-form" class="subform" data-index="{{ loop.index0 }}">
-                {{ subform.quizQuestions.label }}
-                {{ subform.quizQuestions(size=20) }}
-
-                {{ subform.quizAnswers.label }}
-                {{ subform.quizAnswers(size=(20))}}
-
+                <p> Question: {{ loop.index0 + 1}} </p>
+                {{ subform.quesType}}
+                <br>
+                {{ subform.quizQuestion.label }}
+                {{ subform.quizQuestion(size=30) }}
+                <br>
+                {{ subform.quizAnswer.label }}
+                {{ subform.quizAnswer(size=20)}} 
+                <!-- {{ subform.option}} -->
+                <br><br>
             </div>
             {% endfor %}
         </div>  
@@ -33,12 +34,17 @@
     </form>
     
     <div id="quiz-_-form" class="is-hidden" data-index="_">
-        <label for="question-_-quizQuestions">Question</label>
-        <input id="question-_-quizQuestions" name="question-_-quizQuestions" type="text" value="">
-        <label for="question-_-quizAnswers">Answer</label>
-        <input id="question-_-quizAnswers" name="question-_-quizAnswers" type="text">
-
+        <p id="quesNo"> Question: </p>
+        <select id="question-_-quesType" name="question-_-quesType"><option value="shortAns">Short Answer</option><option value="longAns">Long Answer</option></select>
         <a class="remove" href="#">Remove</a>
+        <br>
+        <label for="question-_-quizQuestion">Question</label>
+        <input id="question-_-quizQuestion" name="question-_-quizQuestion" type="text" value="">
+        <br>
+        <label for="question-_-quizAnswer">Answer</label>
+        <input id="question-_-quizAnswer" name="question-_-quizAnswer" type="text" required>
+        <br>
+        <br>
     </div>
     {% if form.errors %}
             {{ form.errors }}
@@ -58,18 +64,43 @@
 <style>
     .is-hidden {
         display: none;
-    }
+    }adjustIndices(removedIndex);
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
         <script>
             /**
+            * Changes Question type
+            **/
+            function typeChange() {
+                var $form = this.closest('.subform');
+
+                if (this.value == "longAns") {
+                    $form.getElementsByTagName('input')[1].remove();
+                    $form.getElementsByTagName('label')[1].remove();
+                } else if (this.value == "shortAns") {
+                    console.log('eval short success')
+                    var removedIndex = $form.getAttribute("data-index")
+                    $form.remove();
+                    adjustIndices(removedIndex);
+                    addForm();
+
+                } else {
+                    console.log("did not eval")
+                }
+                
+                
+            }
+            
+
+            /** Code below taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */
+            /**
              * Adjust the indices of form fields when removing items.
              */
             function adjustIndices(removedIndex) {
                 var $forms = $('.subform');
-
+                
                 $forms.each(function(i) {
                     var $form = $(this);
                     var index = parseInt($form.data('index'));
@@ -79,18 +110,31 @@
                         // Skip
                         return true;
                     }
-
+                    $form.find("p")[0].innerHTML = "Question: " + (newIndex + 1);
                     // Change ID in form itself
                     $form.attr('id', $form.attr('id').replace(index, newIndex));
+                    $form.attr('data-index', $form.attr('data-index').replace(index, newIndex));
                     $form.data('index', newIndex);
-
                     // Change IDs in form inputs
                     $form.find('input').each(function(j) {
                         var $item = $(this);
                         $item.attr('id', $item.attr('id').replace(index, newIndex));
                         $item.attr('name', $item.attr('name').replace(index, newIndex));
                     });
+                    //Change labels id and name
+                    $form.find('label').each(function(k) {
+                        var $item = $(this);
+                        $item.attr('for', $item.attr('for').replace(index, newIndex));
+                    });
+                    //Change select field id and name
+                    $form.find('select').each(function(l) {
+                    var $item = $(this);
+                    $item.attr('id', $item.attr('id').replace(index, newIndex));
+                    $item.attr('name', $item.attr('name').replace(index, newIndex));
+                    });
+                    
                 });
+                
             }
 
             /**
@@ -100,6 +144,7 @@
                 var $removedForm = $(this).closest('.subform');
                 var removedIndex = parseInt($removedForm.data('index'));
 
+                console.log(removedIndex)
                 $removedForm.remove();
 
                 // Update indices
@@ -126,8 +171,8 @@
                     newIndex = parseInt($lastForm.data('index')) + 1;
                 }
 
-                // Maximum of 20 subforms
-                if (newIndex > 20) {
+                // Maximum of 30 subforms
+                if (newIndex > 30) {
                     console.log('[WARNING] Reached maximum number of elements');
                     return;
                 }
@@ -136,11 +181,24 @@
                 var $newForm = $templateForm.clone();
 
                 $newForm.attr('id', $newForm.attr('id').replace('_', newIndex));
+                $newForm.attr('data-index', $newForm.attr('data-index').replace('_', newIndex))
                 $newForm.data('index', newIndex);
 
+                $newForm.find("p")[0].innerHTML += newIndex + 1;
+                //Change input id and name
                 $newForm.find('input').each(function(idx) {
                     var $item = $(this);
-
+                    $item.attr('id', $item.attr('id').replace('_', newIndex));
+                    $item.attr('name', $item.attr('name').replace('_', newIndex));
+                });
+                //Change labels id and name
+                $newForm.find('label').each(function(idx) {
+                    var $item = $(this);
+                    $item.attr('for', $item.attr('for').replace('_', newIndex));
+                });
+                //Change select field id and name
+                $newForm.find('select').each(function(idx) {
+                    var $item = $(this);
                     $item.attr('id', $item.attr('id').replace('_', newIndex));
                     $item.attr('name', $item.attr('name').replace('_', newIndex));
                 });
@@ -149,15 +207,18 @@
                 $('#subforms-container').append($newForm);
                 $newForm.addClass('subform');
                 $newForm.removeClass('is-hidden');
-
-                $newForm.find('.remove').click(removeForm);
+                $newForm.find('select')[0].onchange = typeChange;
+                $newForm.find('.remove').click(removeForm); 
             }
 
 
             $(document).ready(function() {
                 $('#add').click(addForm);
                 $('.remove').click(removeForm);
+                document.getElementsByTagName('select')[0].onchange = typeChange;
+                document.getElementById('question-0-quizAnswer').setAttribute("required", "");
             });
+            /** Code above taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */
         </script>
 
 {%endblock%}

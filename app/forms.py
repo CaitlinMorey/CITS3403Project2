@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, FieldList, FormField, Form
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, FieldList, FormField, RadioField, Form, SelectField, TextAreaField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import User
+
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -17,9 +18,7 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])
-    admin = BooleanField('Admin')
-    user = BooleanField('User')
-    view = BooleanField('View')
+    userType = SelectField("Type", choices = [("admin", "Admin"), ("user", "User"), ("overview", "Overview")])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -32,9 +31,14 @@ class RegistrationForm(FlaskForm):
         if user is not None:
             raise ValidationError('Please use a different email address.')
 
+
 class quesAndAnswer(Form):
-    quizQuestions = StringField("Question", validators=[DataRequired()])
-    quizAnswers = StringField("Answer", validators=[DataRequired()])
+    quesType = SelectField("Type", choices = [("shortAns", "Short Answer"), ("longAns", "Long Answer")])
+    quizQuestion = StringField("Question", validators=[DataRequired()])
+    quizAnswer = StringField("Answer")
+
+
+
 
 class quizCreation(FlaskForm):
     quizName = StringField("Quiz Name: ", validators=[DataRequired()])
@@ -42,4 +46,10 @@ class quizCreation(FlaskForm):
     question = FieldList(FormField(quesAndAnswer), min_entries=1)
     submit = SubmitField('Create')
 
+class quizAttempt(FlaskForm):
+    submit = SubmitField('Submit')
 
+
+#     option = FieldList(FormField(quesOptions), min_entries=1)
+# class quesOptions(Form):
+#     option: StringField("Option:")
