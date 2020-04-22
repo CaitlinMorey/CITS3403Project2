@@ -1,0 +1,11 @@
+AnsSubmitted to mark
+at = quizAttempts.query.filter_by(user=u).filter_by(quizAttempted=q).filter_by(mark=None).count()
+
+Total question marked
+at = quizAttempts.query.filter_by(user=u).filter_by(quizAttempted=q).filter(quizAttempts.mark != None).count()
+
+Total correct/marked questions
+at = quizAttempts.query.filter_by(user=u).filter_by(quizAttempted=q).filter(quizAttempts.mark >= 1).count()
+
+Total questions attempted
+at = quizAttempts.query.filter_by(user=u).filter_by(quizAttempted=q).count()

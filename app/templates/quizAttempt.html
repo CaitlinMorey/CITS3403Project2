@@ -17,8 +17,8 @@
             
         <br> {%for ques in range(1, quiz.questions|length + 1)%}
                 {{quiz.questions[ques -1]}} <br>
-                {{form['ques' + ques|string].label}} <br>
-                {{form['ques' + ques|string]}}
+                <!-- {{form['ques' + ques|string].label}} <br>
+                {{form['ques' + ques|string]}} -->
                 <br>
              {%endfor%}
             {{form.submit}}

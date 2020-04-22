@@ -9,6 +9,7 @@ from app import db
 from app.forms import *
 from flask_login import logout_user
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+import json
 
 
 @app.route('/')
@@ -124,7 +125,9 @@ def takeQuiz(quizName):
             setattr(quizAttempt, "ques"+str(ques + 1), StringField("Answer:"))    
         if quiz.questions[ques].quesType == "longAns":
             setattr(quizAttempt, "ques"+str(ques + 1), TextAreaField("Answer:",  render_kw={"rows": 20, "cols": 50}))
-
+        if quiz.questions[ques].quesType == "multi":
+############# up to mutli choice display in quiz attempts            
+        
     if form.validate_on_submit():
         for ques in range(0, len(quiz.questions)):
             if str(quiz.questions[ques].answer[0]) != "":
@@ -145,19 +148,17 @@ def takeQuiz(quizName):
 def createQuiz():
     form = quizCreation()
     if form.validate_on_submit():
-        print("hello")
-        print(form.quizName.data)
-        print(form.quizDescription.data)
-        print(form.question.data)
         quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
+        
         for ques in form.question.data:
-             print(ques["quesType"], ques["quizQuestion"], ques["quizAnswer"])
-             newQuestion = quizQuestions(question=ques["quizQuestion"], quesType=ques["quesType"], quiz=quiz)
-             newAnswer = quizAnswers(answer=ques["quizAnswer"], question=newQuestion)
-             db.session.commit()
+            if ques["quesType"] == "multi":
+                options = [form.question.data[0]["option1"], form.question.data[0]["option2"], form.question.data[0]["option3"]]
+                ques["quizQuestion"] = str({ques["quizQuestion"]:options})
+            
+            newQuestion = quizQuestions(question=ques["quizQuestion"], quesType=ques["quesType"], quiz=quiz)
+            newAnswer = quizAnswers(answer=ques["quizAnswer"], question=newQuestion)
+            db.session.commit()
         return redirect(url_for("dash"))
-    else:
-        print(form.errors)
     return render_template("quizCreation.html", form=form)
 
 

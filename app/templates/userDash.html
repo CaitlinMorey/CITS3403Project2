@@ -11,12 +11,13 @@
         <h4>Quizzes</h4>
         <ul style="list-style-type:none; text-align: left;">
             {%for quiz in quizzes:%}
-            <li>Title : {{quiz.quizName}} </li>
-            <li>Description: {{quiz.quizDescription}} </li>
-            <li><a href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
-            {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).first() != None %}
-            <li> Avg Mark:  {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}  % </li>
+                <li>Title : {{quiz.quizName}} </li>
+                <li>Description: {{quiz.quizDescription}} </li>
+                <li><a href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
+                {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).first() != None %}
+                <li> Avg Mark:  {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}  % </li>
             {%endif%}
+            <br>
             {%endfor%}
         </ul>
         <hr>
@@ -26,4 +27,4 @@
 
 </div>
 
-{%endblock%}
+{%endblock%}u

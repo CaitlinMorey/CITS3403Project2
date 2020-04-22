@@ -32,11 +32,15 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Please use a different email address.')
 
 
+
 class quesAndAnswer(Form):
-    quesType = SelectField("Type", choices = [("shortAns", "Short Answer"), ("longAns", "Long Answer")])
+    quesType = SelectField("Type", choices = [("shortAns", "Short Answer"), ("longAns", "Long Answer"), ("multi", "Multi-Choice")])
     quizQuestion = StringField("Question", validators=[DataRequired()])
     quizAnswer = StringField("Answer")
-
+    option1 = StringField("Option: ")
+    option2 = StringField("Option: ")
+    option3 = StringField("Option: ")
+    
 
 
 
@@ -49,7 +53,3 @@ class quizCreation(FlaskForm):
 class quizAttempt(FlaskForm):
     submit = SubmitField('Submit')
 
-
-#     option = FieldList(FormField(quesOptions), min_entries=1)
-# class quesOptions(Form):
-#     option: StringField("Option:")
