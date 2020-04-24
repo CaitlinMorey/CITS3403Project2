@@ -15,8 +15,11 @@
                 <li>Description: {{quiz.quizDescription}} </li>
                 <li><a href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
                 {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).first() != None %}
-                <li> Avg Mark:  {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}  % </li>
-            {%endif%}
+                <li> Avg Mark:  {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}  % </li>                {%endif%}
+                
+                {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() != 0 %}
+                <li>No of Attemps: {{(quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()) | int}}</li>
+                {%endif%}
             <br>
             {%endfor%}
         </ul>

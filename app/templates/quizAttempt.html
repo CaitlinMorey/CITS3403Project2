@@ -2,7 +2,9 @@
 
 {%block content%}
 <style>
-
+ul {
+    list-style-type:none;
+}
 </style>
 <div class="jumbotron" style="text-align: center; margin-top: 5%;">
     <h2>Title : {{quiz.quizName}}</h2>
@@ -13,14 +15,14 @@
         <hr>
         <form action="" method="post">
             {{ form.hidden_tag() }}
-        <li>Questions:</li>
-            
-        <br> {%for ques in range(1, quiz.questions|length + 1)%}
-                {{quiz.questions[ques -1]}} <br>
-                <!-- {{form['ques' + ques|string].label}} <br>
-                {{form['ques' + ques|string]}} -->
-                <br>
-             {%endfor%}
+            <li>Questions:</li>
+
+            <br> {%for ques in range(1, quiz.questions|length + 1)%}
+                    {{quiz.questions[ques -1]}} <br>
+                    {{form['ques' + ques|string].label}} <br>
+                    {{form['ques' + ques|string]}}
+            <br>
+            {%endfor%}
             {{form.submit}}
         </form>
     </div>

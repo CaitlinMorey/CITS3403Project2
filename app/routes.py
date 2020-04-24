@@ -9,8 +9,7 @@ from app import db
 from app.forms import *
 from flask_login import logout_user
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
-import json
-
+import random
 
 @app.route('/')
 @app.route('/index')
@@ -46,11 +45,10 @@ def logout():
 @login_required
 def dash():
     quizzes = Quiz.query.all()
-    attempts = quizAttempts
     if str(current_user.roles) == "[admin]":
         return render_template("adminDash.html", quizzes=quizzes)
     elif str(current_user.roles) == "[user]":
-        return render_template("userDash.html", quizzes=quizzes, quizAttempts=attempts)
+        return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions)
     else:
         return render_template("viewDash.html", quizzes=quizzes)
 
@@ -64,7 +62,7 @@ def profile():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('dash'))
     form = RegistrationForm()
     if form.validate_on_submit():
 
@@ -117,31 +115,53 @@ def deleteQuiz(quizName):
 @app.route("/takeQuiz/<quizName>/", methods=['GET', 'POST'])
 def takeQuiz(quizName):
     quiz = Quiz.query.filter_by(quizName=quizName).first()
-    form = quizAttempt()
+    
 
-    #Add answer type to each question
+    #Dynamically build answer form for each question type
     for ques in range(0, len(quiz.questions)):
         if quiz.questions[ques].quesType == "shortAns":
             setattr(quizAttempt, "ques"+str(ques + 1), StringField("Answer:"))    
         if quiz.questions[ques].quesType == "longAns":
             setattr(quizAttempt, "ques"+str(ques + 1), TextAreaField("Answer:",  render_kw={"rows": 20, "cols": 50}))
         if quiz.questions[ques].quesType == "multi":
-############# up to mutli choice display in quiz attempts            
-        
+            optionsStr = str(quiz.questions[ques].options).replace("'","")
+            ans = str(quiz.questions[ques].answer[0])
+            optionsList = optionsStr.strip('][').split(',')
+            choices=[]
+            for elem in range(0, len(optionsList)):
+                choice = ('opt'+str(elem), optionsList[elem])
+                choices.append(choice)
+            choices.append((ans,ans))
+            random.shuffle(choices)
+            setattr(quizAttempt, "ques"+str(ques + 1), RadioField("", choices=choices))
+
+    form = quizAttempt()
     if form.validate_on_submit():
+        attemptNo = 1
+        
+        #check if quiz has been attempted or assign attempt no.
+        noOfAttempts = quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()
+        if noOfAttempts != 0:
+            attemptNo = noOfAttempts + 1
+
+        #Mark each question 
         for ques in range(0, len(quiz.questions)):
-            if str(quiz.questions[ques].answer[0]) != "":
+
+            #if question answer is not "" thus a long answer question then we check if submitted answer is in answer
+            if str(quiz.questions[ques].answer[0]) != "None":
                 if str(quiz.questions[ques].answer[0]) in form.data["ques" + str(ques+1)]:
                     mark = 1
                 else:
                     mark = 0    
             else:
                 mark=None
-            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], ansSubmit=form.data["ques" + str(ques+1)], mark=mark)
+            
+            #Build attempt entry in quizAttempts
+            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=form.data["ques" + str(ques+1)], mark=mark)
             db.session.add(attempt)
             db.session.commit()
-        print(form.data)
-        print("submitted")
+
+        render_template('quizAttempt.html', quiz=quiz, form=form)
     return render_template('quizAttempt.html', quiz=quiz, form=form)
 
 @app.route("/createQuiz", methods=['GET', 'POST'])
@@ -149,14 +169,23 @@ def createQuiz():
     form = quizCreation()
     if form.validate_on_submit():
         quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
-        
         for ques in form.question.data:
+
+            #add options to quizQuestions table from form
+            options = ""
             if ques["quesType"] == "multi":
-                options = [form.question.data[0]["option1"], form.question.data[0]["option2"], form.question.data[0]["option3"]]
-                ques["quizQuestion"] = str({ques["quizQuestion"]:options})
-            
-            newQuestion = quizQuestions(question=ques["quizQuestion"], quesType=ques["quesType"], quiz=quiz)
-            newAnswer = quizAnswers(answer=ques["quizAnswer"], question=newQuestion)
+                print(ques["option1"])
+                options = [ques["option1"], ques["option2"], ques["option3"]]
+                options = str(options)
+
+            #ensure long answer questions have no answer attached
+            if ques["quesType"] == "longAns":
+                answer = None
+            else:
+                answer = ques["quizAnswer"]
+
+            newQuestion = quizQuestions(question=ques["quizQuestion"], options=options, quesType=ques["quesType"], quiz=quiz)
+            newAnswer = quizAnswers(answer=answer, question=newQuestion)
             db.session.commit()
         return redirect(url_for("dash"))
     return render_template("quizCreation.html", form=form)

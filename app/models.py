@@ -17,7 +17,7 @@ class User(UserMixin, db.Model):
     userFullName = db.Column(db.String(140))
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    quizzes = db.relationship('Quiz', backref='author', lazy='dynamic')
+    quizzes = db.relationship('Quiz', backref='author', lazy='dynamic', cascade="all, delete-orphan")
     roles = db.relationship('Role', secondary=userRoles, backref=db.backref('users', lazy='dynamic'))
 
     quizAttempts = db.relationship('quizAttempts', backref='user', lazy='dynamic',  cascade="all, delete-orphan")
@@ -47,13 +47,13 @@ class Role(db.Model):
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    quizName = db.Column(db.String(140))
+    quizName = db.Column(db.String(140), unique=True)
     quizDescription = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     questions = db.relationship('quizQuestions', backref='quiz', cascade="all, delete-orphan")
 
-    quizAttempt = db.relationship('quizAttempts', backref='quizAttempted', lazy='dynamic',  cascade="all, delete-orphan")
+    attempts = db.relationship('quizAttempts', backref='quizAttempted', lazy='dynamic',  cascade="all, delete-orphan")
 
 
     def __repr__(self):
@@ -64,6 +64,7 @@ class quizQuestions(db.Model):
     question = db.Column(db.String(140))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     quesType = db.Column(db.String(10))
+    options = db.Column(db.String(140))
     answer = db.relationship('quizAnswers', backref='question', cascade="all, delete-orphan")
 
     quesAttempt = db.relationship('quizAttempts', backref='quesAttempted', lazy='dynamic',  cascade="all, delete-orphan")
@@ -83,6 +84,8 @@ class quizAttempts(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     quest_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'))
+    quizAttemptNo = db.Column(db.Integer)
     ansSubmit = db.Column(db.String(140))
     mark = db.Column(db.Integer)
-
+    def __repr__ (self):
+        return '{}'.format(self.ansSubmit)
