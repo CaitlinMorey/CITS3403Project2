@@ -45,11 +45,12 @@ def logout():
 @login_required
 def dash():
     quizzes = Quiz.query.all()
+    existingCategories = quizCategory.query.all()
     if str(current_user.roles) == "[admin]":
-        return render_template("adminDash.html", quizzes=quizzes)
+        return render_template("adminDash.html", quizzes=quizzes, existingCategories=existingCategories)
 
     elif str(current_user.roles) == "[user]":
-        existingCategories = quizCategory.query.all()
+        
 
         return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories )
     else:
