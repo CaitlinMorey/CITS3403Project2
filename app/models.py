@@ -10,6 +10,19 @@ userRoles =db.Table("userRoles",
             db.Column("role_id", db.Integer(), db.ForeignKey("role.id"))
             )
     
+class quizCategory(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    
+    def __repr__(self):
+        return "{}".format(self.name)
+
+
+
+quizCategories = db.Table("quizCategories",
+            db.Column("quiz_id", db.Integer(), db.ForeignKey("quiz.id")),
+            db.Column("quizCategory_id", db.Integer(), db.ForeignKey(quizCategory.id))
+            )
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,15 +62,17 @@ class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     quizName = db.Column(db.String(140), unique=True)
     quizDescription = db.Column(db.String(140))
+    category = db.relationship('quizCategory', secondary=quizCategories, backref=db.backref('quizzes', lazy='dynamic'))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     questions = db.relationship('quizQuestions', backref='quiz', cascade="all, delete-orphan")
-
     attempts = db.relationship('quizAttempts', backref='quizAttempted', lazy='dynamic',  cascade="all, delete-orphan")
 
 
     def __repr__(self):
         return '{}'.format(self.quizName)
+
+
 
 class quizQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)

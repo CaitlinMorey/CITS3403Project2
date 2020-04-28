@@ -12,6 +12,11 @@
 
         <p> {{ form.quizName.label }} {{ form.quizName(size=10) }} </p>
         <p> {{ form.quizDescription.label }} {{ form.quizDescription(size=10) }} </p>
+        {%if form.selectedCategory %}
+        <p> {{ form.selectedCategory.label}} {{ form.selectedCategory}} </p>
+        {%else%}
+        {%endif%}
+        <p> {{ form.quizCategory.label }} {{ form.quizCategory(size=20)}} </p>
         <br>
         <div id="subforms-container">
             {% for subform in form.question %}
@@ -272,13 +277,3 @@
 
 {%endblock%}
 
-<ul id="question-0-option">
-    <li><label for="question-0-option-0">Option-0</label>
-        <table id="question-0-option-0">
-            <tr>
-                <th><label for="question-0-option-0-option">Option: </label></th>
-                <td><input id="question-0-option-0-option" name="question-0-option-0-option" type="text" value=""></td>
-            </tr>
-        </table>
-    </li>
-</ul>

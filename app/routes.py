@@ -47,8 +47,11 @@ def dash():
     quizzes = Quiz.query.all()
     if str(current_user.roles) == "[admin]":
         return render_template("adminDash.html", quizzes=quizzes)
+
     elif str(current_user.roles) == "[user]":
-        return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions)
+        existingCategories = quizCategory.query.all()
+
+        return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories )
     else:
         return render_template("viewDash.html", quizzes=quizzes)
 
@@ -166,15 +169,41 @@ def takeQuiz(quizName):
 
 @app.route("/createQuiz", methods=['GET', 'POST'])
 def createQuiz():
+    
+
+    #get list of existing categories
+    existingCategories = quizCategory.query.all()
+    
+    #add select field to quizCreation form with existing categories
+    if existingCategories != []:
+        #create choices field
+        choices = []
+        for category in existingCategories:
+            choices.append((str(category),str(category)))
+        setattr(quizCreation, "selectedCategory", SelectField("Category: ", choices=choices, coerce=str))
+
     form = quizCreation()
     if form.validate_on_submit():
+        
+        print(form.selectedCategory.data)
+        #Create Quiz Category if new one is specified
+        if form.quizCategory.data != "":
+            dbCategory = quizCategory.query.filter_by(name=form.quizCategory.data).first()
+            if dbCategory is None:
+                dbCategory = quizCategory(name=form.quizCategory.data)
+                db.session.add(dbCategory)
+        #else if quiz category is selected.
+        else:
+            dbCategory = quizCategory.query.filter_by(name=form.selectedCategory.data).first()
+        
         quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
+        dbCategory.quizzes.append(quiz) #potentially need to change if existing category is selected.
+
         for ques in form.question.data:
 
             #add options to quizQuestions table from form
             options = ""
             if ques["quesType"] == "multi":
-                print(ques["option1"])
                 options = [ques["option1"], ques["option2"], ques["option3"]]
                 options = str(options)
 
@@ -188,6 +217,7 @@ def createQuiz():
             newAnswer = quizAnswers(answer=answer, question=newQuestion)
             db.session.commit()
         return redirect(url_for("dash"))
+    
     return render_template("quizCreation.html", form=form)
 
 

@@ -11,6 +11,7 @@
             {%for quiz in quizzes:%}
             <li>Title : {{quiz.quizName}} </li>
             <li>Description: {{quiz.quizDescription}} </li>
+            <li>Category: {{quiz.category[0]}} </li>
             <li><a href="{{ url_for('deleteQuiz', quizName=quiz) }}"> Delete </a></li>
             {%endfor%}
         

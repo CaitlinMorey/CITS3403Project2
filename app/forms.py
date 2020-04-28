@@ -48,6 +48,7 @@ class quizCreation(FlaskForm):
     quizName = StringField("Quiz Name: ", validators=[DataRequired()])
     quizDescription = StringField("Quiz Description: ")
     question = FieldList(FormField(quesAndAnswer), min_entries=1)
+    quizCategory = StringField("New Quiz Category: ")
     submit = SubmitField('Create')
 
 class quizAttempt(FlaskForm):
