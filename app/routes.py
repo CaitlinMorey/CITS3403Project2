@@ -48,10 +48,7 @@ def dash():
     existingCategories = quizCategory.query.all()
     if str(current_user.roles) == "[admin]":
         return render_template("adminDash.html", quizzes=quizzes, existingCategories=existingCategories)
-
     elif str(current_user.roles) == "[user]":
-        
-
         return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories )
     else:
         return render_template("viewDash.html", quizzes=quizzes)
@@ -138,6 +135,9 @@ def takeQuiz(quizName):
             choices.append((ans,ans))
             random.shuffle(choices)
             setattr(quizAttempt, "ques"+str(ques + 1), RadioField("", choices=choices))
+        if quiz.questions[ques].quesType == "fillIn":
+            for i in range(0, quiz.questions[ques].question.count("*blank")):
+                setattr(quizAttempt, "ques"+str(ques + 1)+"b"+str(i), StringField("")) 
 
     form = quizAttempt()
     if form.validate_on_submit():
@@ -148,24 +148,46 @@ def takeQuiz(quizName):
         if noOfAttempts != 0:
             attemptNo = noOfAttempts + 1
 
+
         #Mark each question 
         for ques in range(0, len(quiz.questions)):
-
-            #if question answer is not "" thus a long answer question then we check if submitted answer is in answer
+            
+            #if question answer is not "None" thus a long answer question then we check if submitted answer is in answer
             if str(quiz.questions[ques].answer[0]) != "None":
-                if str(quiz.questions[ques].answer[0]) in form.data["ques" + str(ques+1)]:
-                    mark = 1
+                
+                if quiz.questions[ques].quesType == "fillIn":
+                    #build answer string
+                    ans = []
+                    print("number of blanks in question: ", quiz.questions[ques].question.count("*blank"))
+
+                    for i in range(0, quiz.questions[ques].question.count("*blank")):
+                        print("appending ", form.data["ques" + str(ques+1) + "b" + str(i)], " to ans list")
+                        ans.append(form.data["ques" + str(ques+1) + "b" + str(i)])
+
+                    print("comparing ", str(ans).strip("][").replace("'", ""), " with ", str(quiz.questions[ques].answer[0]))
+                    if str(ans).strip("][").replace("'", "") == str(quiz.questions[ques].answer[0]):
+                        mark = 1
+                    else: 
+                        mark = 0
+                    ansSubmitted = str(ans).strip("][")
                 else:
-                    mark = 0    
+                    ansSubmitted = form.data["ques" + str(ques+1)]
+                    if str(quiz.questions[ques].answer[0]) in ansSubmitted:
+                        mark = 1
+                    else:
+                        mark = 0
+                
             else:
                 mark=None
             
             #Build attempt entry in quizAttempts
-            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=form.data["ques" + str(ques+1)], mark=mark)
+            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark)
             db.session.add(attempt)
             db.session.commit()
-
-        render_template('quizAttempt.html', quiz=quiz, form=form)
+            render_template('quizAttempt.html', quiz=quiz, form=form)
+    else:
+        print("errors")
+        
     return render_template('quizAttempt.html', quiz=quiz, form=form)
 
 @app.route("/createQuiz", methods=['GET', 'POST'])

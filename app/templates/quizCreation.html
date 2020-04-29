@@ -18,6 +18,10 @@
         {%endif%}
         <p> {{ form.quizCategory.label }} {{ form.quizCategory(size=20)}} </p>
         <br>
+        When creating a fill in the blank question please enter the question as follows: <br>
+        Question: The language used to structure a webpage is called *blank1* and was created in *blank2* <br>
+        Answer: HTML, 1991 <br>
+
         <div id="subforms-container">
             {% for subform in form.question %}
             <div id="quiz-{{ loop.index0 }}-form" class="subform" data-index="{{ loop.index0 }}">
@@ -39,7 +43,7 @@
                     <input id="question-0-option3" name="question-0-option3" type="text" value="">
 
                 </div>
-                <br> 
+                <br>
 
                 {{ subform.quizAnswer.label }}
                 {{ subform.quizAnswer(size=20)}}
@@ -60,6 +64,7 @@
         <option value="shortAns">Short Answer</option>
         <option value="longAns">Long Answer</option>
         <option value="multi">Multi-Choice</option>
+        <option value="fillIn">Fill-in-the-Blank</option>
     </select>
     <a class="remove" href="#">Remove</a>
     <br>
@@ -114,6 +119,7 @@
     **/
     function typeChange() {
         var $form = this.closest('.subform');
+        console.log($form)
         var $quesForm = $(this).closest('.subform');
         if (this.value == "longAns") {
             $form.getElementsByTagName('input')[4].removeAttribute("required");
@@ -128,6 +134,13 @@
             $form.getElementsByTagName('input')[4].style.display = "initial";
             $form.getElementsByTagName('label')[4].style.display = "initial";
             $quesForm.find(".option-container").addClass("is-hidden")
+        } else if (this.value == "fillIn") {
+            $form.getElementsByTagName('input')[4].setAttribute("required", "");
+            $form.getElementsByTagName('label')[4].setAttribute("required", "");
+            $form.getElementsByTagName('input')[4].style.display = "initial";
+            $form.getElementsByTagName('label')[4].style.display = "initial";
+            $quesForm.find(".option-container").addClass("is-hidden")
+
         } else {
 
             $quesForm.find(".option-container").removeClass("is-hidden")
@@ -269,11 +282,10 @@
     $(document).ready(function () {
         $('#add').click(addForm);
         $('.remove').click(removeForm);
-        document.getElementsByTagName('select')[0].onchange = typeChange;
+        document.getElementsByTagName('select')[1].onchange = typeChange;
         document.getElementById('question-0-quizAnswer').setAttribute("required", "");
     });
             /** Code above taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */
 </script>
 
 {%endblock%}
-

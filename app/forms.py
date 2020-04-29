@@ -34,7 +34,7 @@ class RegistrationForm(FlaskForm):
 
 
 class quesAndAnswer(Form):
-    quesType = SelectField("Type", choices = [("shortAns", "Short Answer"), ("longAns", "Long Answer"), ("multi", "Multi-Choice")])
+    quesType = SelectField("Type", choices = [("shortAns", "Short Answer"), ("longAns", "Long Answer"), ("multi", "Multi-Choice"), ("fillIn", "Fill-in-the-Blank")])
     quizQuestion = StringField("Question", validators=[DataRequired()])
     quizAnswer = StringField("Answer")
     option1 = StringField("Option: ")
