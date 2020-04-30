@@ -1,9 +1,11 @@
 from datetime import datetime
-from app import db
+from app import db, admin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import login
-
+from flask_admin.contrib.sqla import ModelView
+from flask_admin.base import MenuLink
+from sqlalchemy.ext.hybrid import hybrid_property
 
 userRoles =db.Table("userRoles",
             db.Column("user_id", db.Integer(), db.ForeignKey("user.id")),
@@ -42,7 +44,25 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return 'Username: {}, Name: {}, Role: {}'.format(self.username, self.userFullName, self.roles) #Tells python how to print objects from this class
+        return 'Username: {}, Name: {}'.format(self.username, self.userFullName, self.roles) #Tells python how to print objects from this class
+
+
+
+    @hybrid_property
+    def password(self):
+        return self.password_hash
+
+    @password.setter
+    def password(self, new_pass):
+        new_password_hash = generate_password_hash(new_pass)
+        self.password_hash = new_password_hash
+
+
+
+class UserView(ModelView):
+    form_columns = ["username", "userFullName", "email", "roles", "password"]
+    column_list = ["username", "userFullName", "email", "roles"]
+
 
 
 @login.user_loader
@@ -104,3 +124,11 @@ class quizAttempts(db.Model):
     mark = db.Column(db.Integer)
     def __repr__ (self):
         return '{}'.format(self.ansSubmit)
+
+
+admin.add_view(UserView(User, db.session))
+admin.add_view(ModelView(Quiz,db.session, endpoint="quizView"))
+admin.add_view(ModelView(quizQuestions,db.session))
+admin.add_view(ModelView(quizAnswers,db.session))
+admin.add_view(ModelView(quizAttempts,db.session))
+

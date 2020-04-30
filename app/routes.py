@@ -47,7 +47,7 @@ def dash():
     quizzes = Quiz.query.all()
     existingCategories = quizCategory.query.all()
     if str(current_user.roles) == "[admin]":
-        return render_template("adminDash.html", quizzes=quizzes, existingCategories=existingCategories)
+        return redirect("admin")
     elif str(current_user.roles) == "[user]":
         return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories )
     else:
@@ -136,7 +136,7 @@ def takeQuiz(quizName):
             random.shuffle(choices)
             setattr(quizAttempt, "ques"+str(ques + 1), RadioField("", choices=choices))
         if quiz.questions[ques].quesType == "fillIn":
-            for i in range(0, quiz.questions[ques].question.count("*blank")):
+            for i in range(0, quiz.questions[ques].question.count("*blank*")):
                 setattr(quizAttempt, "ques"+str(ques + 1)+"b"+str(i), StringField("")) 
 
     form = quizAttempt()
@@ -158,9 +158,9 @@ def takeQuiz(quizName):
                 if quiz.questions[ques].quesType == "fillIn":
                     #build answer string
                     ans = []
-                    print("number of blanks in question: ", quiz.questions[ques].question.count("*blank"))
+                    print("number of blanks in question: ", quiz.questions[ques].question.count("*blank*"))
 
-                    for i in range(0, quiz.questions[ques].question.count("*blank")):
+                    for i in range(0, quiz.questions[ques].question.count("*blank*")):
                         print("appending ", form.data["ques" + str(ques+1) + "b" + str(i)], " to ans list")
                         ans.append(form.data["ques" + str(ques+1) + "b" + str(i)])
 
@@ -185,9 +185,7 @@ def takeQuiz(quizName):
             db.session.add(attempt)
             db.session.commit()
             render_template('quizAttempt.html', quiz=quiz, form=form)
-    else:
-        print("errors")
-        
+
     return render_template('quizAttempt.html', quiz=quiz, form=form)
 
 @app.route("/createQuiz", methods=['GET', 'POST'])
@@ -239,7 +237,7 @@ def createQuiz():
             newQuestion = quizQuestions(question=ques["quizQuestion"], options=options, quesType=ques["quesType"], quiz=quiz)
             newAnswer = quizAnswers(answer=answer, question=newQuestion)
             db.session.commit()
-        return redirect(url_for("dash"))
+        return redirect(url_for("quizView.index_view"))
     
     return render_template("quizCreation.html", form=form)
 

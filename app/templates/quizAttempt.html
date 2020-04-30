@@ -24,7 +24,7 @@
                 {% set ns = namespace(count = 0) %}
                     {% for word in quiz.questions[ques -1].question.split(" ") %}
 
-                        {% if "*blank" in word %}
+                        {% if "*blank*" in word %}
                             {{form['ques' + ques|string + "b" + ns.count|string]}}
                             {% set ns.count = ns.count + 1 %}
                         {%else%}
