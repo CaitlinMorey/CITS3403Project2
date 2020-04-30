@@ -1,0 +1,18 @@
+{%extends "base.html"%}
+
+{%block content%}
+
+<div class="jumbotron" style="margin-top: 5%;">
+    <h1 style="text-align: center;">Profile Page</h1>
+    <h3>Name: {{ current_user.userFullName }} </h3>
+    <p> Username: {{ current_user.username }}<br>
+        Email: {{ current_user.email }}<br>
+
+            
+        <a href="{{ url_for('deleteAccount', username=current_user.username)}}"> Delete Account </a>
+    </p>
+    
+    
+</div>
+
+{%endblock%}

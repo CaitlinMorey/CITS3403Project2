@@ -1,0 +1,71 @@
+{% extends 'admin/base.html' %}
+{% block head %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+{{super()}}
+<script>
+    window.onload = function () {
+        var els = document.querySelectorAll("a[href='/admin/quizView/new/?url=%2Fadmin%2FquizView%2F']")[0];
+        els.setAttribute("href", "{{ url_for('createQuiz')}}");
+        els.innerHTML = "Create Quiz";
+    }
+
+</script>
+{% endblock %}
+
+{% block head_css %}
+{{super()}}
+<style>
+    body {
+        background: #EEE;
+        padding-top: 0px;
+    }
+</style>
+{% endblock %}
+
+{%block menu_link %}
+{% endblock %}
+
+{%block brand %}
+{% endblock %}
+
+{% block page_body %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="/index">CITS3403 Web Quiz<span class="sr-only">(current)</span></a>
+
+    <div class="justify-content-end" id="navbarText">
+        <ul class="navbar-nav">
+
+            {% if current_user.is_anonymous%}
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('register') }}">Sign Up</a>
+            </li>
+
+            {% else %}
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('dash')}}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/stats">Statistics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('profile')}}">Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+            </li>
+
+            {% endif%}
+        </ul>
+    </div>
+</nav>
+{{super()}}
+{% endblock %}

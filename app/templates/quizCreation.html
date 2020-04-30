@@ -1,0 +1,291 @@
+{%extends "base.html"%}
+
+{%block content%}
+
+<div class="jumbotron" style="margin-top: 5%;">
+    <h3 style="text-align: center;"> This is Quiz Creation Page </h3>
+    <p>Welcome, {{ current_user.username }}!</p>
+    <br>
+
+    <form id="quiz-form" action="" method="post">
+        {{ form.hidden_tag() }}
+
+        <p> {{ form.quizName.label }} {{ form.quizName(size=10) }} </p>
+        <p> {{ form.quizDescription.label }} {{ form.quizDescription(size=10) }} </p>
+        {%if form.selectedCategory %}
+        <p> {{ form.selectedCategory.label}} {{ form.selectedCategory}} </p>
+        {%else%}
+        {%endif%}
+        <p> {{ form.quizCategory.label }} {{ form.quizCategory(size=20)}} </p>
+        <br>
+        When creating a fill in the blank question please enter the question as follows: <br>
+        Question: The language used to structure a webpage is called *blank* and was created in *blank* <br>
+        Answer: HTML, 1991 <br>
+
+        <div id="subforms-container">
+            {% for subform in form.question %}
+            <div id="quiz-{{ loop.index0 }}-form" class="subform" data-index="{{ loop.index0 }}">
+                <p> Question: {{ loop.index0 + 1}} </p>
+                {{ subform.quesType}}
+                <br>
+                {{ subform.quizQuestion.label }}
+                {{ subform.quizQuestion(size=30) }}
+                <br>
+                <div class="option-container is-hidden">
+                    <br>
+                    <label for="question-0-option1">Option: </label>
+                    <input id="question-0-option1" name="question-0-option1" type="text" value="">
+                    <br>
+                    <label for="question-0-option2">Option: </label>
+                    <input id="question-0-option2" name="question-0-option2" type="text" value="">
+                    <br>
+                    <label for="question-0-option3">Option: </label>
+                    <input id="question-0-option3" name="question-0-option3" type="text" value="">
+
+                </div>
+                <br>
+
+                {{ subform.quizAnswer.label }}
+                {{ subform.quizAnswer(size=20)}}
+            </div>
+
+            <br><br>
+        </div>
+        {% endfor %}
+        <a id="add" href="#">Add Question</a>
+        {{ form.submit() }}
+    </form>
+</div>
+
+
+<div id="quiz-_-form" class="is-hidden" data-index="_">
+    <p id="quesNo"> Question: </p>
+    <select id="question-_-quesType" name="question-_-quesType">
+        <option value="shortAns">Short Answer</option>
+        <option value="longAns">Long Answer</option>
+        <option value="multi">Multi-Choice</option>
+        <option value="fillIn">Fill-in-the-Blank</option>
+    </select>
+    <a class="remove" href="#">Remove</a>
+    <br>
+    <label for="question-_-quizQuestion">Question</label>
+    <input id="question-_-quizQuestion" name="question-_-quizQuestion" type="text" value="">
+    <br>
+    <div class="option-container is-hidden">
+        <label for="question-_-option1">Option: </label>
+        <input id="question-_-option1" name="question-_-option1" type="text" value="">
+        <br>
+        <label for="question-_-option2">Option: </label>
+        <input id="question-_-option2" name="question-_-option2" type="text" value="">
+        <br>
+        <label for="question-_-option3">Option: </label>
+        <input id="question-_-option3" name="question-_-option3" type="text" value="">
+
+    </div>
+    <br>
+    <label for="question-_-quizAnswer">Answer</label>
+    <input id="question-_-quizAnswer" name="question-_-quizAnswer" type="text" required>
+    <br>
+    <br>
+</div>
+
+
+{% if form.errors %}
+{{ form.errors }}
+{% endif %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul style="list-style-type:none;">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+</div>
+
+<style>
+    .is-hidden {
+        display: none;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+    /**
+    * Changes Question type
+    **/
+    function typeChange() {
+        var $form = this.closest('.subform');
+        console.log($form)
+        var $quesForm = $(this).closest('.subform');
+        if (this.value == "longAns") {
+            $form.getElementsByTagName('input')[4].removeAttribute("required");
+            $form.getElementsByTagName('label')[4].removeAttribute("required");
+            $form.getElementsByTagName('input')[4].style.display = "none";
+            $form.getElementsByTagName('label')[4].style.display = "none";
+            $quesForm.find(".option-container").addClass("is-hidden")
+        } else if (this.value == "shortAns") {
+            console.log('eval short success');
+            $form.getElementsByTagName('input')[4].setAttribute("required", "");
+            $form.getElementsByTagName('label')[4].setAttribute("required", "");
+            $form.getElementsByTagName('input')[4].style.display = "initial";
+            $form.getElementsByTagName('label')[4].style.display = "initial";
+            $quesForm.find(".option-container").addClass("is-hidden")
+        } else if (this.value == "fillIn") {
+            $form.getElementsByTagName('input')[4].setAttribute("required", "");
+            $form.getElementsByTagName('label')[4].setAttribute("required", "");
+            $form.getElementsByTagName('input')[4].style.display = "initial";
+            $form.getElementsByTagName('label')[4].style.display = "initial";
+            $quesForm.find(".option-container").addClass("is-hidden")
+
+        } else {
+
+            $quesForm.find(".option-container").removeClass("is-hidden")
+            $form.getElementsByTagName('input')[4].setAttribute("required", "");
+            $form.getElementsByTagName('label')[4].setAttribute("required", "");
+            $form.getElementsByTagName('input')[4].style.display = "initial";
+            $form.getElementsByTagName('label')[4].style.display = "initial";
+
+
+        }
+
+
+    }
+
+
+    /** Code below taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */
+    /**
+     * Adjust the indices of form fields when removing items.
+     */
+    function adjustIndices(removedIndex) {
+        var $forms = $('.subform');
+
+        $forms.each(function (i) {
+            var $form = $(this);
+            var index = parseInt($form.data('index'));
+            var newIndex = index - 1;
+
+            if (index < removedIndex) {
+                // Skip
+                return true;
+            }
+
+            $form.find("p")[0].innerHTML = "Question: " + (newIndex + 1);
+            // Change ID in form itself
+            $form.attr('id', $form.attr('id').replace(index, newIndex));
+            $form.attr('data-index', $form.attr('data-index').replace(index, newIndex));
+            $form.data('index', newIndex);
+            // Change IDs in form inputs
+            $form.find('input').each(function (j) {
+                var $item = $(this);
+                $item.attr('id', $item.attr('id').replace(index, newIndex));
+                $item.attr('name', $item.attr('name').replace(index, newIndex));
+            });
+            //Change labels id and name
+            $form.find('label').each(function (k) {
+                var $item = $(this);
+                $item.attr('for', $item.attr('for').replace(index, newIndex));
+            });
+            //Change select field id and name
+            $form.find('select').each(function (l) {
+                var $item = $(this);
+                $item.attr('id', $item.attr('id').replace(index, newIndex));
+                $item.attr('name', $item.attr('name').replace(index, newIndex));
+            });
+
+        });
+
+    }
+
+    function addOptions($form) {
+        // var $quesForm = this.closest('.subform');
+    }
+
+    /**
+     * Remove a form.
+     */
+    function removeForm() {
+        var $removedForm = $(this).closest('.subform');
+        var removedIndex = parseInt($removedForm.data('index'));
+
+        console.log(removedIndex)
+        $removedForm.remove();
+
+        // Update indices
+        adjustIndices(removedIndex);
+    }
+
+    /**
+     * Add a new form.
+     */
+    function addForm() {
+        var $templateForm = $('#quiz-_-form');
+
+        if (!$templateForm) {
+            console.log('[ERROR] Cannot find template');
+            return;
+        }
+
+        // Get Last index
+        var $lastForm = $('.subform').last();
+
+        var newIndex = 0;
+
+        if ($lastForm.length > 0) {
+            newIndex = parseInt($lastForm.data('index')) + 1;
+        }
+
+        // Maximum of 30 subforms
+        if (newIndex > 30) {
+            console.log('[WARNING] Reached maximum number of elements');
+            return;
+        }
+
+        // Add elements
+        var $newForm = $templateForm.clone();
+
+        $newForm.attr('id', $newForm.attr('id').replace('_', newIndex));
+        $newForm.attr('data-index', $newForm.attr('data-index').replace('_', newIndex))
+        $newForm.data('index', newIndex);
+
+        $newForm.find("p")[0].innerHTML += newIndex + 1;
+        //Change input id and name
+        $newForm.find('input').each(function (idx) {
+            var $item = $(this);
+            $item.attr('id', $item.attr('id').replace('_', newIndex));
+            $item.attr('name', $item.attr('name').replace('_', newIndex));
+        });
+        //Change labels id and name
+        $newForm.find('label').each(function (idx) {
+            var $item = $(this);
+            $item.attr('for', $item.attr('for').replace('_', newIndex));
+        });
+        //Change select field id and name
+        $newForm.find('select').each(function (idx) {
+            var $item = $(this);
+            $item.attr('id', $item.attr('id').replace('_', newIndex));
+            $item.attr('name', $item.attr('name').replace('_', newIndex));
+        });
+
+        // Append
+        $('#subforms-container').append($newForm);
+        $newForm.addClass('subform');
+        $newForm.removeClass('is-hidden');
+        $newForm.find('select')[0].onchange = typeChange;
+        $newForm.find('.remove').click(removeForm);
+    }
+
+
+    $(document).ready(function () {
+        $('#add').click(addForm);
+        $('.remove').click(removeForm);
+        document.getElementsByTagName('select')[1].onchange = typeChange;
+        document.getElementById('question-0-quizAnswer').setAttribute("required", "");
+    });
+            /** Code above taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */
+</script>
+
+{%endblock%}
