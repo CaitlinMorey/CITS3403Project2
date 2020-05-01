@@ -3,9 +3,11 @@ from app import db, admin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import login
+from flask_admin import expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.base import MenuLink
 from sqlalchemy.ext.hybrid import hybrid_property
+from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
 
 userRoles =db.Table("userRoles",
             db.Column("user_id", db.Integer(), db.ForeignKey("user.id")),
@@ -56,13 +58,6 @@ class User(UserMixin, db.Model):
     def password(self, new_pass):
         new_password_hash = generate_password_hash(new_pass)
         self.password_hash = new_password_hash
-
-
-
-class UserView(ModelView):
-    form_columns = ["username", "userFullName", "email", "roles", "password"]
-    column_list = ["username", "userFullName", "email", "roles"]
-
 
 
 @login.user_loader
@@ -123,18 +118,46 @@ class quizAttempts(db.Model):
     quest_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'))
     quizAttemptNo = db.Column(db.Integer)
     ansSubmit = db.Column(db.String(140))
+    feedback = db.Column(db.String(200))
     mark = db.Column(db.Integer)
     def __repr__ (self):
         return '{}'.format(self.ansSubmit)
 
-class AnswerView(ModelView):
-    form_columns = ["answer", "quest_id"]
 
+def getUserNames():
+    uniqueUserNames = User.query.filter(User.roles.any(name="user")).all()
+    return [(user.userFullName, user.userFullName) for user in uniqueUserNames]
+
+class attemptsView(ModelView):
+    column_filters = [
+        FilterEqual(column=User.userFullName, name='Name', options=getUserNames),
+    ]
+    can_create = False
+
+    @expose('/')
+    def index_view(self):
+        self._refresh_filters_cache()
+        return super(attemptsView, self).index_view()
+
+class AnswerView(ModelView):
+    can_create = False
+   
+class questionView(ModelView):
+    can_create = False
+
+class UserView(ModelView):
+    form_columns = ["username", "userFullName", "email", "roles", "password"]
+    column_labels = {"userFullName": "Full Name", "email": "Email", "roles": "Roles"}
+    column_list = ["username", "userFullName", "email", "roles"]
+
+class quizView(ModelView):
+    column_list = ["quizName", "quizDescription", "timestamp", "author"]
+    column_labels = {"quizName":"Quiz Name", "quizDescription":"Quiz Description","timestamp":"Date Created"}
 
 
 admin.add_view(UserView(User, db.session))
-admin.add_view(ModelView(Quiz,db.session, endpoint="quizView"))
-admin.add_view(ModelView(quizQuestions,db.session, "Questions"))
+admin.add_view(quizView(Quiz,db.session, endpoint="quizView"))
+admin.add_view(questionView(quizQuestions,db.session, "Questions"))
 admin.add_view(AnswerView(quizAnswers,db.session, "Answers"))
-admin.add_view(ModelView(quizAttempts,db.session, "Attempts"))
+admin.add_view(attemptsView(quizAttempts,db.session, "Attempts"))
 

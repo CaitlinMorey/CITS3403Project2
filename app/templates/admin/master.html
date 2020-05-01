@@ -4,29 +4,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 {{super()}}
-<script>
-    window.onload = function () {
-        var elm = document.querySelectorAll("a[href='/admin/quizView/new/?url=%2Fadmin%2FquizView%2F']")[0];
-        if (typeof elm !== "undefined") {
-            elm.setAttribute("href", "{{ url_for('createQuiz')}}");
-        elm.innerHTML = "Create Quiz";
-        }
-        var elm1 = document.querySelectorAll("a[href='/admin/quizquestions/new/?url=%2Fadmin%2Fquizquestions%2F']")[0];
-        if (typeof elm1 !== "undefined") {
-            elm1.style.display = "none";
-        }
-        var elm2 = document.querySelectorAll("a[href='/admin/quizanswers/new/?url=%2Fadmin%2Fquizanswers%2F']")[0];
-        if (typeof elm2 !== "undefined") {
-            elm2.style.display = "none";
-        }
-        var elm3 = document.querySelectorAll("a[href='/admin/quizattempts/new/?url=%2Fadmin%2Fquizattempts%2F']")[0];
-        if (typeof elm3 !== "undefined") {
-            elm3.style.display = "none";
-        }
-    }
-
-</script>
 {% endblock %}
 
 {% block head_css %}
@@ -35,6 +14,25 @@
     body {
         background: #EEE;
         padding-top: 0px;
+    }
+    .navbar-inner {
+        background-image: linear-gradient(to bottom,#007bff,#007bff);
+        border: none;
+        
+    }
+    .navbar .nav>li>a {
+        text-shadow: none;
+        color: white;
+    }
+    .navbar .nav>.active>a, .navbar .nav>.active>a:hover, .navbar .nav>.active>a:focus {
+        background-color: #007bff;
+        color: rgb(175, 175, 175);
+    }
+    .navbar .nav>li>a:hover {
+        color:rgb(175, 175, 175);    
+    }
+    .link {
+        color: none;
     }
 </style>
 {% endblock %}
@@ -46,9 +44,8 @@
 {% endblock %}
 
 {% block page_body %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <a class="navbar-brand" href="/index">CITS3403 Web Quiz<span class="sr-only">(current)</span></a>
+<nav class="navbar navbar-expand-lg navbar-light bg-primary">
+    <a class="navbar-brand" style="color:white;" href="/index">CITS3403 Web Quiz<span class="sr-only">(current)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
         aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -59,7 +56,7 @@
             {% if current_user.is_anonymous%}
 
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                <a class="nav-link" style="color:white;" href="{{ url_for('login') }}">Login</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('register') }}">Sign Up</a>
@@ -68,16 +65,16 @@
             {% else %}
 
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('dash')}}">Dashboard</a>
+                <a class="nav-link" style="color:white;" href="{{ url_for('dash')}}">Dashboard</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/stats">Statistics</a>
+                <a class="nav-link" style="color:white;" href="/stats">Statistics</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('profile')}}">Profile</a>
+                <a class="nav-link" style="color:white;" href="{{ url_for('profile')}}">Profile</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                <a class="nav-link"  style="color:white;"href="{{ url_for('logout') }}">Logout</a>
             </li>
 
             {% endif%}

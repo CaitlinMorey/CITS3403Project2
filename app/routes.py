@@ -173,7 +173,7 @@ def takeQuiz(quizName):
                 mark=None
             
             #Build attempt entry in quizAttempts
-            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark)
+            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark, feedback=None)
             db.session.add(attempt)
             db.session.commit()
         return redirect(url_for("dash"))
