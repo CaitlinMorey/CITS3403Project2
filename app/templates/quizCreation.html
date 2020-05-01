@@ -73,7 +73,7 @@
     <br>
     <div class="option-container is-hidden">
         <label for="question-_-option1">Option: </label>
-        <input id="question-_-option1" name="question-_-option1" type="text" value="">
+        <input id="question-_-option1" name="question-_-option1" type="text" value="" required>
         <br>
         <label for="question-_-option2">Option: </label>
         <input id="question-_-option2" name="question-_-option2" type="text" value="">
@@ -282,7 +282,12 @@
     $(document).ready(function () {
         $('#add').click(addForm);
         $('.remove').click(removeForm);
+        {%if form.selectedCategory %}
         document.getElementsByTagName('select')[1].onchange = typeChange;
+        {%else%}
+        document.getElementsByTagName('select')[0].onchange = typeChange;
+        {%endif%}
+        
         document.getElementById('question-0-quizAnswer').setAttribute("required", "");
     });
             /** Code above taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */

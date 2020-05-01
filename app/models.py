@@ -86,6 +86,7 @@ class Quiz(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     questions = db.relationship('quizQuestions', backref='quiz', cascade="all, delete-orphan")
+    answers = db.relationship('quizAnswers', backref='quiz', cascade="all, delete-orphan")
     attempts = db.relationship('quizAttempts', backref='quizAttempted', lazy='dynamic',  cascade="all, delete-orphan")
 
 
@@ -110,9 +111,10 @@ class quizQuestions(db.Model):
 class quizAnswers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     quest_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'))
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     answer = db.Column(db.String(140))
     def __repr__ (self):
-        return '{}'.format(self.answer)
+        return '{}'.format(self.answer, self.question.quiz)
 
 class quizAttempts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -125,10 +127,14 @@ class quizAttempts(db.Model):
     def __repr__ (self):
         return '{}'.format(self.ansSubmit)
 
+class AnswerView(ModelView):
+    form_columns = ["answer", "quest_id"]
+
+
 
 admin.add_view(UserView(User, db.session))
 admin.add_view(ModelView(Quiz,db.session, endpoint="quizView"))
-admin.add_view(ModelView(quizQuestions,db.session))
-admin.add_view(ModelView(quizAnswers,db.session))
-admin.add_view(ModelView(quizAttempts,db.session))
+admin.add_view(ModelView(quizQuestions,db.session, "Questions"))
+admin.add_view(AnswerView(quizAnswers,db.session, "Answers"))
+admin.add_view(ModelView(quizAttempts,db.session, "Attempts"))
 

@@ -147,24 +147,16 @@ def takeQuiz(quizName):
         noOfAttempts = quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()
         if noOfAttempts != 0:
             attemptNo = noOfAttempts + 1
-
-
         #Mark each question 
         for ques in range(0, len(quiz.questions)):
-            
             #if question answer is not "None" thus a long answer question then we check if submitted answer is in answer
             if str(quiz.questions[ques].answer[0]) != "None":
                 
                 if quiz.questions[ques].quesType == "fillIn":
                     #build answer string
                     ans = []
-                    print("number of blanks in question: ", quiz.questions[ques].question.count("*blank*"))
-
                     for i in range(0, quiz.questions[ques].question.count("*blank*")):
-                        print("appending ", form.data["ques" + str(ques+1) + "b" + str(i)], " to ans list")
                         ans.append(form.data["ques" + str(ques+1) + "b" + str(i)])
-
-                    print("comparing ", str(ans).strip("][").replace("'", ""), " with ", str(quiz.questions[ques].answer[0]))
                     if str(ans).strip("][").replace("'", "") == str(quiz.questions[ques].answer[0]):
                         mark = 1
                     else: 
@@ -184,7 +176,7 @@ def takeQuiz(quizName):
             attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark)
             db.session.add(attempt)
             db.session.commit()
-            render_template('quizAttempt.html', quiz=quiz, form=form)
+        return redirect(url_for("dash"))
 
     return render_template('quizAttempt.html', quiz=quiz, form=form)
 
@@ -206,7 +198,6 @@ def createQuiz():
     form = quizCreation()
     if form.validate_on_submit():
         
-        print(form.selectedCategory.data)
         #Create Quiz Category if new one is specified
         if form.quizCategory.data != "":
             dbCategory = quizCategory.query.filter_by(name=form.quizCategory.data).first()
@@ -219,13 +210,15 @@ def createQuiz():
         
         quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
         dbCategory.quizzes.append(quiz) #potentially need to change if existing category is selected.
-
+        
         for ques in form.question.data:
 
             #add options to quizQuestions table from form
-            options = ""
+            options = []
             if ques["quesType"] == "multi":
-                options = [ques["option1"], ques["option2"], ques["option3"]]
+                for i in range(0,3):
+                    if ques["option"+str(i)] != "":
+                        options.append(ques["option"+str(i)])
                 options = str(options)
 
             #ensure long answer questions have no answer attached
@@ -235,8 +228,8 @@ def createQuiz():
                 answer = ques["quizAnswer"]
 
             newQuestion = quizQuestions(question=ques["quizQuestion"], options=options, quesType=ques["quesType"], quiz=quiz)
-            newAnswer = quizAnswers(answer=answer, question=newQuestion)
-            db.session.commit()
+            newAnswer = quizAnswers(answer=answer, question=newQuestion,  quiz=quiz)
+        db.session.commit()
         return redirect(url_for("quizView.index_view"))
     
     return render_template("quizCreation.html", form=form)

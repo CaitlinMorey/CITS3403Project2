@@ -7,9 +7,23 @@
 {{super()}}
 <script>
     window.onload = function () {
-        var els = document.querySelectorAll("a[href='/admin/quizView/new/?url=%2Fadmin%2FquizView%2F']")[0];
-        els.setAttribute("href", "{{ url_for('createQuiz')}}");
-        els.innerHTML = "Create Quiz";
+        var elm = document.querySelectorAll("a[href='/admin/quizView/new/?url=%2Fadmin%2FquizView%2F']")[0];
+        if (typeof elm !== "undefined") {
+            elm.setAttribute("href", "{{ url_for('createQuiz')}}");
+        elm.innerHTML = "Create Quiz";
+        }
+        var elm1 = document.querySelectorAll("a[href='/admin/quizquestions/new/?url=%2Fadmin%2Fquizquestions%2F']")[0];
+        if (typeof elm1 !== "undefined") {
+            elm1.style.display = "none";
+        }
+        var elm2 = document.querySelectorAll("a[href='/admin/quizanswers/new/?url=%2Fadmin%2Fquizanswers%2F']")[0];
+        if (typeof elm2 !== "undefined") {
+            elm2.style.display = "none";
+        }
+        var elm3 = document.querySelectorAll("a[href='/admin/quizattempts/new/?url=%2Fadmin%2Fquizattempts%2F']")[0];
+        if (typeof elm3 !== "undefined") {
+            elm3.style.display = "none";
+        }
     }
 
 </script>
@@ -35,8 +49,11 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <a class="navbar-brand" href="/index">CITS3403 Web Quiz<span class="sr-only">(current)</span></a>
-
-    <div class="justify-content-end" id="navbarText">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+        aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse justify-content-end" id="navbarText">
         <ul class="navbar-nav">
 
             {% if current_user.is_anonymous%}
