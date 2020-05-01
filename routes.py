@@ -9,6 +9,13 @@ def creation():
     
     return render_template('create.html', form=form)
 
+@app.route('/stats')
+def stats():
+    labels = ["html", "CSS", "Javascript"]
+    values = [5,10,15]
+   
+    return render_template('chart.html', labels = labels, values = values)
+
 
 @app.route('/htmlquiz', methods=['GET', 'POST'])
 def htmlquiz():
