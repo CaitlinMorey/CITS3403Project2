@@ -7,7 +7,7 @@ from flask_admin import expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.base import MenuLink
 from sqlalchemy.ext.hybrid import hybrid_property
-from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
+from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual, FilterLike, FilterInList
 
 userRoles =db.Table("userRoles",
             db.Column("user_id", db.Integer(), db.ForeignKey("user.id")),
@@ -126,12 +126,26 @@ class quizAttempts(db.Model):
 
 def getUserNames():
     uniqueUserNames = User.query.filter(User.roles.any(name="user")).all()
-    return [(user.userFullName, user.userFullName) for user in uniqueUserNames]
+    return [(user.username, user.username) for user in uniqueUserNames]
+
+def getQuizNames():
+    uniqueQuizNames = []
+    attempts = quizAttempts.query.all()
+    for at in attempts:
+        entry = (at.quiz_id, at.quizAttempted)
+        if entry not in uniqueQuizNames:
+            uniqueQuizNames.append(entry)
+        else:
+            continue
+
+    return uniqueQuizNames
 
 class attemptsView(ModelView):
     column_filters = [
-        FilterEqual(column=User.userFullName, name='Name', options=getUserNames),
+        FilterEqual(column=User.username, name='User', options=getUserNames),
+        FilterEqual(column=quizAttempts.quiz_id, name='Quiz', options=getQuizNames),
     ]
+    column_labels = {"quizAttemptNo":"Attempt No.", "ansSubmit":"Answer Submitted", "quizAttempted":"Quiz", "quesAttempted":"Question"}
     can_create = False
 
     @expose('/')

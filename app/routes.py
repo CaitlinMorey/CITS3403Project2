@@ -82,7 +82,6 @@ def register():
 
         user = User(username=form.username.data,email=form.email.data, userFullName=form.userFullName.data)
         user.set_password(form.password.data)
-        print(form.userType.data)
         if form.userType.data == "admin":
             adminRole.users.append(user)
         elif form.userType.data == "user":
@@ -207,18 +206,16 @@ def createQuiz():
         #else if quiz category is selected.
         else:
             dbCategory = quizCategory.query.filter_by(name=form.selectedCategory.data).first()
-        
+
         quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
         dbCategory.quizzes.append(quiz) #potentially need to change if existing category is selected.
         
         for ques in form.question.data:
 
             #add options to quizQuestions table from form
-            options = []
+            options = ""
             if ques["quesType"] == "multi":
-                for i in range(0,3):
-                    if ques["option"+str(i)] != "":
-                        options.append(ques["option"+str(i)])
+                options = [ques["option1"], ques["option2"], ques["option3"]]
                 options = str(options)
 
             #ensure long answer questions have no answer attached

@@ -10,7 +10,11 @@
     <form id="quiz-form" action="" method="post">
         {{ form.hidden_tag() }}
 
-        <p> {{ form.quizName.label }} {{ form.quizName(size=10) }} </p>
+        <p> {{ form.quizName.label }} {{ form.quizName(size=10) }} 
+        {% for error in form.quizName.errors %}
+            <span style="font-size: small;color: red;">[{{ error | string }}]</span>
+        {% endfor %}
+        </p>
         <p> {{ form.quizDescription.label }} {{ form.quizDescription(size=10) }} </p>
         {%if form.selectedCategory %}
         <p> {{ form.selectedCategory.label}} {{ form.selectedCategory}} </p>
@@ -18,7 +22,7 @@
         {%endif%}
         <p> {{ form.quizCategory.label }} {{ form.quizCategory(size=20)}} </p>
         <br>
-        When creating a fill in the blank question please enter the question as follows: <br>
+        Fill in the blank example: <br>
         Question: The language used to structure a webpage is called *blank* and was created in *blank* <br>
         Answer: HTML, 1991 <br>
 
@@ -26,7 +30,8 @@
             {% for subform in form.question %}
             <div id="quiz-{{ loop.index0 }}-form" class="subform" data-index="{{ loop.index0 }}">
                 <p> Question: {{ loop.index0 + 1}} </p>
-                {{ subform.quesType}}
+                Quiz Type: {{ subform.quesType}} 
+                <br>
                 <br>
                 {{ subform.quizQuestion.label }}
                 {{ subform.quizQuestion(size=30) }}
@@ -73,7 +78,7 @@
     <br>
     <div class="option-container is-hidden">
         <label for="question-_-option1">Option: </label>
-        <input id="question-_-option1" name="question-_-option1" type="text" value="" required>
+        <input id="question-_-option1" name="question-_-option1" type="text" value="">
         <br>
         <label for="question-_-option2">Option: </label>
         <input id="question-_-option2" name="question-_-option2" type="text" value="">
@@ -90,20 +95,6 @@
 </div>
 
 
-{% if form.errors %}
-{{ form.errors }}
-{% endif %}
-
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul style="list-style-type:none;">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
-</div>
 
 <style>
     .is-hidden {
@@ -114,42 +105,54 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <script>
+    
+    function setRequired(inputs, required, hide) {
+        for (x in inputs) {
+                if (typeof inputs[x].id !== "undefined") {
+                    var idStr = inputs[x].id;
+                    if (required.some(v => idStr.includes(v)) ) {
+                        inputs[x].setAttribute("required", "");
+                        inputs[x].style.display = "initial";
+                        $("label[for=" + inputs[x].name + "]").show();
+                    } else {
+                        inputs[x].removeAttribute("required");
+                    }
+                    if (hide.some(v => idStr.includes(v)) ){
+                        inputs[x].style.display = "none";
+                        $("label[for=" + inputs[x].name + "]").hide();
+                    }
+                } else {
+                    continue;
+                }
+            }
+    }
     /**
     * Changes Question type
     **/
     function typeChange() {
         var $form = this.closest('.subform');
-        console.log($form)
         var $quesForm = $(this).closest('.subform');
+        var inputs = $form.getElementsByTagName('input')
         if (this.value == "longAns") {
-            $form.getElementsByTagName('input')[4].removeAttribute("required");
-            $form.getElementsByTagName('label')[4].removeAttribute("required");
-            $form.getElementsByTagName('input')[4].style.display = "none";
-            $form.getElementsByTagName('label')[4].style.display = "none";
+            var required = ["quizQuestion"]
+            var hide = ["quizAnswer"]
+            setRequired(inputs, required, hide)
             $quesForm.find(".option-container").addClass("is-hidden")
         } else if (this.value == "shortAns") {
-            console.log('eval short success');
-            $form.getElementsByTagName('input')[4].setAttribute("required", "");
-            $form.getElementsByTagName('label')[4].setAttribute("required", "");
-            $form.getElementsByTagName('input')[4].style.display = "initial";
-            $form.getElementsByTagName('label')[4].style.display = "initial";
+            var required = ["quizQuestion", "quizAnswer"]
+            var hide = ["None"]
+            setRequired(inputs, required, hide)
             $quesForm.find(".option-container").addClass("is-hidden")
         } else if (this.value == "fillIn") {
-            $form.getElementsByTagName('input')[4].setAttribute("required", "");
-            $form.getElementsByTagName('label')[4].setAttribute("required", "");
-            $form.getElementsByTagName('input')[4].style.display = "initial";
-            $form.getElementsByTagName('label')[4].style.display = "initial";
+            var required = ["quizQuestion", "quizAnswer"]
+            var hide = ["None"]
+            setRequired(inputs, required, hide)
             $quesForm.find(".option-container").addClass("is-hidden")
-
         } else {
-
             $quesForm.find(".option-container").removeClass("is-hidden")
-            $form.getElementsByTagName('input')[4].setAttribute("required", "");
-            $form.getElementsByTagName('label')[4].setAttribute("required", "");
-            $form.getElementsByTagName('input')[4].style.display = "initial";
-            $form.getElementsByTagName('label')[4].style.display = "initial";
-
-
+            var required = ["quizQuestion", "quizAnswer", "option1"]
+            var hide = ["None"]
+            setRequired(inputs, required, hide)
         }
 
 

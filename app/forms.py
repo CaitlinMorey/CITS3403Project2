@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, FieldList, FormField, RadioField, Form, SelectField, TextAreaField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
-from app.models import User
+from app.models import *
 
 
 class LoginForm(FlaskForm):
@@ -50,6 +50,11 @@ class quizCreation(FlaskForm):
     question = FieldList(FormField(quesAndAnswer), min_entries=1)
     quizCategory = StringField("New Quiz Category: ")
     submit = SubmitField('Create')
+
+    def validate_quizName(self, quizName):
+        quiz = Quiz.query.filter_by(quizName=quizName.data).first()
+        if quiz is not None:
+            raise ValidationError('Quiz Name already taken')
 
 class quizAttempt(FlaskForm):
     submit = SubmitField('Submit')
