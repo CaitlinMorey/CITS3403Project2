@@ -1,0 +1,27 @@
+{%extends "base.html"%}
+
+{%block content%}
+
+
+<div class="jumbotron" style="text-align: center; margin-top: 5%;">
+    <h1> Welcome to CITS3403 Project 2 Web Development Quiz </h1>
+    <br><br>
+    <p>This quiz is designed to aid aspiring web developers to build their skill set in a fun and interactive way.
+        Click the Sign Up button on the top right to begin your web develop career. The users of this site include
+        teachers and students. Teachers are able to write quizzes for their class, view student performance and add and
+        remove students from their classes. Students are able to sit tests, view their performance compared to their
+        class
+        mates and even review their teachers!</p>
+</div>
+<hr>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+{%endblock%}

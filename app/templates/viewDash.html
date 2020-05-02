@@ -1,0 +1,33 @@
+{%extends "base.html"%}
+
+{%block content%}
+
+<div class="jumbotron" style="text-align: center; margin-top: 5%;">
+    <h1> This is the Overview Dashboard </h1>
+    <p>Welcome, {{ current_user.username }}!<br>
+
+        <br>
+        
+        <h4>Quizzes</h4>
+        <ul style="list-style-type:none; text-align: left;">
+            {%for quiz in quizzes:%}
+            <li>Title : {{quiz.quizName}} </li>
+            <li>Description: {{quiz.quizDescription}} </li>
+            <li>Questions:</li>
+            <ul>
+                {%for question in quiz.questions%}
+                <li>Question: {{question}} </li>
+                <li>Answer: {{question.answer}}
+                {%endfor%}
+            </ul>
+            {%endfor%}
+        </ul>
+        <br>
+        <hr>    
+        <a href="{{ url_for('profile')}}"> Profile </a>
+    </p>
+    
+    
+</div>
+
+{%endblock%}
