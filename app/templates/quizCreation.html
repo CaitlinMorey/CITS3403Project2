@@ -12,7 +12,7 @@
 
         <p> {{ form.quizName.label }} {{ form.quizName(size=10) }} 
         {% for error in form.quizName.errors %}
-            <span style="font-size: small;color: red;">[{{ error | string }}]</span>
+            <span style="font-size: small;color: red;">{{ error | string }}</span>
         {% endfor %}
         </p>
         <p> {{ form.quizDescription.label }} {{ form.quizDescription(size=10) }} </p>
@@ -36,6 +36,11 @@
                 {{ subform.quizQuestion.label }}
                 {{ subform.quizQuestion(size=30) }}
                 <br>
+                {% for error in subform.quizQuestion.errors %}
+                
+                <span style="font-size: small;color: red;">{{ error | string }}</span>
+                {% endfor %}
+                
                 <div class="option-container is-hidden">
                     <br>
                     <label for="question-0-option1">Option: </label>
@@ -52,11 +57,16 @@
 
                 {{ subform.quizAnswer.label }}
                 {{ subform.quizAnswer(size=20)}}
+                <br>
+                {% for error in subform.quizAnswer.errors %}
+                <span style="font-size: small;color: red;">{{ error | string }}</span>
+                {% endfor %}
             </div>
 
             <br><br>
-        </div>
         {% endfor %}
+        </div>
+        
         <a id="add" href="#">Add Question</a>
         {{ form.submit() }}
     </form>
@@ -74,9 +84,10 @@
     <a class="remove" href="#">Remove</a>
     <br>
     <label for="question-_-quizQuestion">Question</label>
-    <input id="question-_-quizQuestion" name="question-_-quizQuestion" type="text" value="">
+    <input id="question-_-quizQuestion"  name="question-_-quizQuestion" type="text" value="">
     <br>
     <div class="option-container is-hidden">
+        <br>
         <label for="question-_-option1">Option: </label>
         <input id="question-_-option1" name="question-_-option1" type="text" value="">
         <br>
@@ -92,15 +103,12 @@
     <input id="question-_-quizAnswer" name="question-_-quizAnswer" type="text" required>
     <br>
     <br>
+<p>end of quesform</p>
 </div>
 
 
 
-<style>
-    .is-hidden {
-        display: none;
-    }
-</style>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
@@ -133,17 +141,18 @@
         var $form = this.closest('.subform');
         var $quesForm = $(this).closest('.subform');
         var inputs = $form.getElementsByTagName('input')
-        if (this.value == "longAns") {
+        var type = this.value;
+        if (type == "longAns") {
             var required = ["quizQuestion"]
             var hide = ["quizAnswer"]
             setRequired(inputs, required, hide)
             $quesForm.find(".option-container").addClass("is-hidden")
-        } else if (this.value == "shortAns") {
+        } else if (type == "shortAns") {
             var required = ["quizQuestion", "quizAnswer"]
             var hide = ["None"]
             setRequired(inputs, required, hide)
             $quesForm.find(".option-container").addClass("is-hidden")
-        } else if (this.value == "fillIn") {
+        } else if (type== "fillIn") {
             var required = ["quizQuestion", "quizAnswer"]
             var hide = ["None"]
             setRequired(inputs, required, hide)
@@ -157,7 +166,6 @@
 
 
     }
-
 
     /** Code below taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */
     /**
@@ -203,9 +211,6 @@
 
     }
 
-    function addOptions($form) {
-        // var $quesForm = this.closest('.subform');
-    }
 
     /**
      * Remove a form.
@@ -272,7 +277,7 @@
             $item.attr('id', $item.attr('id').replace('_', newIndex));
             $item.attr('name', $item.attr('name').replace('_', newIndex));
         });
-
+        
         // Append
         $('#subforms-container').append($newForm);
         $newForm.addClass('subform');
@@ -290,7 +295,6 @@
         {%else%}
         document.getElementsByTagName('select')[0].onchange = typeChange;
         {%endif%}
-        
         document.getElementById('question-0-quizAnswer').setAttribute("required", "");
     });
             /** Code above taken and edited from: https://www.rmedgar.com/blog/dynamic-fields-flask-wtf */

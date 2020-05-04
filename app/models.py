@@ -49,7 +49,7 @@ class User(UserMixin, db.Model):
         return 'Username: {}, Name: {}'.format(self.username, self.userFullName, self.roles) #Tells python how to print objects from this class
 
 
-
+    #For flask admin user creation
     @hybrid_property
     def password(self):
         return self.password_hash
@@ -159,6 +159,7 @@ class AnswerView(ModelView):
 class questionView(ModelView):
     can_create = False
 
+
 class UserView(ModelView):
     form_columns = ["username", "userFullName", "email", "roles", "password"]
     column_labels = {"userFullName": "Full Name", "email": "Email", "roles": "Roles"}
@@ -169,9 +170,12 @@ class quizView(ModelView):
     column_labels = {"quizName":"Quiz Name", "quizDescription":"Quiz Description","timestamp":"Date Created"}
 
 
+
 admin.add_view(UserView(User, db.session))
 admin.add_view(quizView(Quiz,db.session, endpoint="quizView"))
 admin.add_view(questionView(quizQuestions,db.session, "Questions"))
 admin.add_view(AnswerView(quizAnswers,db.session, "Answers"))
 admin.add_view(attemptsView(quizAttempts,db.session, "Attempts"))
+
+
 

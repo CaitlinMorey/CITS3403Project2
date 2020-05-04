@@ -213,10 +213,13 @@ def createQuiz():
         for ques in form.question.data:
 
             #add options to quizQuestions table from form
-            options = ""
+            options = []
+            listOfOptions = ["option1", "option2", "option3"]
             if ques["quesType"] == "multi":
-                options = [ques["option1"], ques["option2"], ques["option3"]]
-                options = str(options)
+                for optNo in listOfOptions:
+                    if ques[optNo] != "" or ques[optNo] != " ":
+                        options.append(ques[optNo])
+            options = str(options)
 
             #ensure long answer questions have no answer attached
             if ques["quesType"] == "longAns":
@@ -228,7 +231,8 @@ def createQuiz():
             newAnswer = quizAnswers(answer=answer, question=newQuestion,  quiz=quiz)
         db.session.commit()
         return redirect(url_for("quizView.index_view"))
-    
+    else:
+        print(form.errors)
     return render_template("quizCreation.html", form=form)
 
 

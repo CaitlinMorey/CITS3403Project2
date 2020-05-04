@@ -41,6 +41,20 @@ class quesAndAnswer(Form):
     option2 = StringField("Option: ")
     option3 = StringField("Option: ")
     
+    def validate(self):
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+
+        if self.quesType.data == "fillIn":
+            if "*blank*" not in self.quizQuestion.data:
+                self.quizQuestion.errors += ("Fill-in-the-blank requires *blank* in the question",)
+                return False
+            elif self.quizQuestion.data.count("*blank*") != len(self.quizAnswer.data.split(",")):
+                self.quizAnswer.errors += ("Number of answers do not match number of *blank* entries in question",)
+                return False
+        return True
+        
 
 
 
@@ -55,6 +69,7 @@ class quizCreation(FlaskForm):
         quiz = Quiz.query.filter_by(quizName=quizName.data).first()
         if quiz is not None:
             raise ValidationError('Quiz Name already taken')
+
 
 class quizAttempt(FlaskForm):
     submit = SubmitField('Submit')
