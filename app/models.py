@@ -31,10 +31,11 @@ quizCategories = db.Table("quizCategories",
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
-    userFullName = db.Column(db.String(140))
-    email = db.Column(db.String(120), index=True, unique=True)
+    userFullName = db.Column(db.String(128))
+    email = db.Column(db.String(128), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     quizzes = db.relationship('Quiz', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+
     roles = db.relationship('Role', secondary=userRoles, backref=db.backref('users', lazy='dynamic'))
 
     quizAttempts = db.relationship('quizAttempts', backref='user', lazy='dynamic',  cascade="all, delete-orphan")
@@ -75,8 +76,8 @@ class Role(db.Model):
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    quizName = db.Column(db.String(140), unique=True)
-    quizDescription = db.Column(db.String(140))
+    quizName = db.Column(db.String(128), unique=True)
+    quizDescription = db.Column(db.String(128))
     category = db.relationship('quizCategory', secondary=quizCategories, backref=db.backref('quizzes', lazy='dynamic'))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -92,10 +93,10 @@ class Quiz(db.Model):
 
 class quizQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(140))
+    question = db.Column(db.String(128))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     quesType = db.Column(db.String(10))
-    options = db.Column(db.String(140))
+    options = db.Column(db.String(128))
     answer = db.relationship('quizAnswers', backref='question', cascade="all, delete-orphan")
 
     quesAttempt = db.relationship('quizAttempts', backref='quesAttempted', lazy='dynamic',  cascade="all, delete-orphan")
@@ -108,6 +109,7 @@ class quizAnswers(db.Model):
     quest_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     answer = db.Column(db.String(140))
+    
     def __repr__ (self):
         return '{}'.format(self.answer, self.question.quiz)
 
@@ -117,8 +119,8 @@ class quizAttempts(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     quest_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'))
     quizAttemptNo = db.Column(db.Integer)
-    ansSubmit = db.Column(db.String(140))
-    feedback = db.Column(db.String(200))
+    ansSubmit = db.Column(db.String(128))
+    feedback = db.Column(db.String(256))
     mark = db.Column(db.Integer)
     def __repr__ (self):
         return '{}'.format(self.ansSubmit)

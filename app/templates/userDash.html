@@ -2,46 +2,44 @@
 
 {%block content%}
 
-<div class="jumbotron" style="text-align: center; margin-top: 5%;">
-    <h1> This is the User Dashboard </h1>
+<div class="bubble">
+    <h1> Dashboard </h1>
     <p>Welcome, {{ current_user.username }}!<br>
-
         <br>
-        
         <h4>Quizzes</h4>
         
-        <select id="categorySelected">
+        Category: <select id="categorySelected">
             <option value="all">All</option>
         {% for data in existingCategories %}
             <option value={{data}}> {{data}} </option>
         {% endfor %}
         </select>
         <hr>
+        <br>
             {%for quiz in quizzes:%}
             <ul style="list-style-type:none; text-align: left;" class={{quiz.category[0]}}>
-                <li>Title : {{quiz.quizName}} </li>
+                <li style="font-size: larger;">{{quiz.quizName}} </li>
                 <li>Description: {{quiz.quizDescription}} </li>
                 <li>Category: {{quiz.category[0]}} </li>
-                <li><a href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
+                
                 {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).first() != None %}
                 <li> Avg Mark:  {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}  % </li>                
                 {%endif%}
-                
+
                 {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() != 0 %}
                 <li>No of Attempts: {{(quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()) | int}}</li>
                 {%endif%}
-            <br>
+                <li><a class="remove" href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
             </ul>
+            <br>
+            <hr>
             {%endfor%}
 
-        
-        <hr>
-        <a href="{{ url_for('profile')}}"> Profile </a>
-    </p>
+        </p>
 
 
-</div>
-
+    </div>    
+<br>
 <style>
     .is-hidden {
         display: none;

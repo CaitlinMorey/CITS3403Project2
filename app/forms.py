@@ -35,8 +35,8 @@ class RegistrationForm(FlaskForm):
 
 class quesAndAnswer(Form):
     quesType = SelectField("Type", choices = [("shortAns", "Short Answer"), ("longAns", "Long Answer"), ("multi", "Multi-Choice"), ("fillIn", "Fill-in-the-Blank")])
-    quizQuestion = StringField("Question", validators=[DataRequired()])
-    quizAnswer = StringField("Answer")
+    quizQuestion = StringField("Question: ", validators=[DataRequired()])
+    quizAnswer = StringField("Answer: ")
     option1 = StringField("Option: ")
     option2 = StringField("Option: ")
     option3 = StringField("Option: ")
@@ -63,7 +63,7 @@ class quizCreation(FlaskForm):
     quizDescription = StringField("Quiz Description: ")
     question = FieldList(FormField(quesAndAnswer), min_entries=1)
     quizCategory = StringField("New Quiz Category: ")
-    submit = SubmitField('Create')
+    submit = SubmitField('Create Quiz')
 
     def validate_quizName(self, quizName):
         quiz = Quiz.query.filter_by(quizName=quizName.data).first()
