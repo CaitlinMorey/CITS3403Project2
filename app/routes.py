@@ -207,8 +207,9 @@ def createQuiz():
         else:
             dbCategory = quizCategory.query.filter_by(name=form.selectedCategory.data).first()
 
-        quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user)
-        dbCategory.quizzes.append(quiz) #potentially need to change if existing category is selected.
+        quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user, category=dbCategory)
+        
+        # dbCategory.quizzes.append(quiz) #potentially need to change if existing category is selected.
         
         for ques in form.question.data:
 

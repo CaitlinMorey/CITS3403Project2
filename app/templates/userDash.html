@@ -17,10 +17,10 @@
         <hr>
         <br>
             {%for quiz in quizzes:%}
-            <ul style="list-style-type:none; text-align: left;" class={{quiz.category[0]}}>
+            <ul style="list-style-type:none; text-align: left;" class={{quiz.category}}>
                 <li style="font-size: larger;">{{quiz.quizName}} </li>
                 <li>Description: {{quiz.quizDescription}} </li>
-                <li>Category: {{quiz.category[0]}} </li>
+                <li>Category: {{quiz.category}} </li>
                 
                 {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).first() != None %}
                 <li> Avg Mark:  {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}  % </li>                
@@ -30,14 +30,12 @@
                 <li>No of Attempts: {{(quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()) | int}}</li>
                 {%endif%}
                 <li><a class="remove" href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
+                <br>
+                <br>
+                <hr>
             </ul>
-            <br>
-            <hr>
             {%endfor%}
-
         </p>
-
-
     </div>    
 <br>
 <style>
@@ -51,9 +49,9 @@
 <script>
     document.getElementById("categorySelected").onchange = function () {
         if (this.value == "all") {
-            $(".jumbotron ul").removeClass("is-hidden");
+            $(".bubble ul").removeClass("is-hidden");
         } else {
-        $(".jumbotron ul:not(."+this.value+")").addClass("is-hidden");
+        $(".bubble ul:not(."+this.value+")").addClass("is-hidden");
         $("."+this.value).removeClass("is-hidden");  
         }
     }
