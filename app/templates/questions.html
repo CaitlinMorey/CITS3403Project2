@@ -1,0 +1,23 @@
+{% extends "testbase.html" %}
+
+{% block content %}
+    <h1>Quiz</h1>
+    <p>number of questions is</p>
+    <form action="/results" method="POST">
+    
+    <p>Question {{ form.quizQuestion.data }}</p> 
+      
+    <div>
+        <ul>
+            <li><input type="radio" name="{{ form.quizQuestion.data }}" value="a"> {{ form.option1.data }}</li>
+            <li><input type="radio" name="{{ form.quizQuestion.data }}" value="b"> {{ form.option2.data }}</li>
+            <li><input type="radio" name="{{ form.quizQuestion.data }}" value="c"> {{ form.option3.data }}</li>
+        </ul>
+    </div>
+    
+    <input type="submit" value="submit">
+    </form>
+{% endblock %}
+
+
+
