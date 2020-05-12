@@ -12,12 +12,12 @@ class LoginForm(FlaskForm):
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    userFullName = StringField('User Full Name', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('Username:', validators=[DataRequired()])
+    email = StringField('Email:', validators=[DataRequired(), Email()])
+    userFullName = StringField('Full Name:', validators=[DataRequired()])
+    password = PasswordField('Password:', validators=[DataRequired()])
     password2 = PasswordField(
-        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+        'Repeat Password:', validators=[DataRequired(), EqualTo('password')])
     userType = SelectField("Type", choices = [("admin", "Admin"), ("user", "User"), ("overview", "Overview")])
     submit = SubmitField('Register')
 

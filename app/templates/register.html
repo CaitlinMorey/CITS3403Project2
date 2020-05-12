@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="jumbotron" style="text-align: center; margin-top: 5%;">
+<div class="bubble" style="text-align: left; margin-top: 5%;">
     <h1>Register</h1>
+    <br>
     <form action="" method="post">
         {{ form.hidden_tag() }}
         <p>
@@ -42,7 +43,8 @@
             {% endfor %}
         </p>
         <p>User type: {{ form.userType}}</p>
-        <p>{{ form.submit() }}</p>
+        <br>
+        <p class="register">{{ form.submit() }}</p>
     </form>
 </div>
 {% endblock %}

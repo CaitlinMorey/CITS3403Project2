@@ -148,7 +148,6 @@ def getCategoryNames():
             categories.append(entry)
         else:
             continue
-    print(categories)
     return categories
 
 class attemptsView(ModelView):
