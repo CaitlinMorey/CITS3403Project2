@@ -45,6 +45,9 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_id(self):
+        return (self.id)
+
     def __repr__(self):
         return 'Username: {}, Name: {}'.format(self.username, self.userFullName, self.roles) #Tells python how to print objects from this class
 
