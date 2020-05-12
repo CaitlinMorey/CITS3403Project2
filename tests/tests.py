@@ -48,6 +48,13 @@ class userModelCase(TestCase):
     mark.set_password('1234')
     assert_that(mark.check_password('1234')).is_equal_to(True)
 
+  def test_user_get_id(self):
+    mark=User()
+    mark.username='username1'
+    mark.email='username@student.com'
+    db.session.add(mark)
+    db.session.commit()
+    assert_that(type(mark.get_id())).is_equal_to(type(1))
   
 if __name__ == '__main__':
   unittest.main(verbosity=2)
