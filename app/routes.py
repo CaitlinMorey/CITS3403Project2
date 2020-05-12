@@ -1,14 +1,277 @@
-from flask import flash, request, render_template, redirect, url_for
+from flask import render_template, flash, redirect, url_for
 from app import app
-from app import db
+from flask_login import current_user, login_user
 from app.models import *
+from flask_login import login_required
+from flask import request
+from werkzeug.urls import url_parse
+from app import db
 from app.forms import *
-from flask import jsonify
+from flask_login import logout_user
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+import random
 
 @app.route('/')
-@app.route('/create', methods=['GET', 'POST'])
-def creation():
-     #get list of existing categories
+@app.route('/index')
+def index():
+    return render_template("index.html", title="Welcome")
+
+
+@app.route('/stats')
+#@login_required
+def stats():
+    
+    #name = names()
+    #noMarks, avMarks = marks()
+    #noAttempts = attempts()
+
+    return render_template('stats.html')# noAttempts = noAttempts, name = name, noMarks = noMarks, avMarks = avMarks)
+
+
+def names():
+    
+    names = quizCategory.query.all()
+    name = []
+    for i in names:
+        name.append(str(i))
+        
+    return name
+    
+def marks():
+    
+    name = names()
+     
+    noMarks = [] #list of number of attempts for each category
+    averages = []
+    
+    for n in name:
+        quiz = Quiz.query.filter(Quiz.category.any(name=n)).all() #all the quizzes under that category
+        
+        count = 0
+        marks = 0
+        
+        for i in quiz:
+
+            Attempts = quizAttempts.query.filter_by(quizAttempted=i).all() #the attempts for each quiz
+            for j in Attempts:
+                
+                if j.mark >= 1:    #if j.mark != None: 
+                    count += 1
+                    marks += j.mark
+    
+            noMarks.append(marks)
+            averages.append(findAv)
+    
+    avMarks = []
+    
+    for i in range(len(noMarks)):
+        if noMarks[i] == 0:
+            av = 0
+            avMarks.append(av)
+        else:
+            av = noMarks[i]/findAv[i]
+            avMarks.append(av)
+            
+    return noMarks, avMarks
+
+def attempts():
+    
+    name = names()
+     
+    noAttempts = [] #list of number of attempts for each category
+    
+    for n in name:
+        quiz = Quiz.query.filter(Quiz.category.any(name=n)).all() #all the quizzes under that category
+        
+        marks = 0
+        
+        for i in quiz:
+            Attempts = quizAttempts.query.filter_by(quizAttempted=i).all() #the marks for each quiz
+            for j in Attempts:
+                if j.quizAttemptNo != None:
+                    marks += j.quizAttemptNo
+    
+            noAttempts.append[marks]
+            
+    return noAttempts
+
+def usermarks():
+    u = User(username=form.username.data)
+    #first find all quizes attempted by a user
+    q = Quiz.query.filter(Quiz.quizName.any(name=n)).all()
+    #then find which quiz they want to see results of 
+    at = quizAttempts.query.filter_by(user=u).filter_by(quizAttempted=q).filter(quizAttempts.mark != None).count()
+    
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('dash')
+        return redirect(next_page)
+    return render_template('login.html', title='Sign In', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
+@app.route('/dash', methods=['GET', 'POST'])
+@login_required
+def dash():
+    quizzes = Quiz.query.all()
+    existingCategories = quizCategory.query.all()
+    if str(current_user.roles) == "[admin]":
+        return redirect("admin")
+    elif str(current_user.roles) == "[user]":
+        return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories )
+    else:
+        return render_template("viewDash.html", quizzes=quizzes)
+
+
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html")
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dash'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+
+        userRole = Role.query.filter_by(name="user").first()
+        if userRole is None:
+            userRole = Role(name="user")
+            db.session.add(userRole)
+        adminRole = Role.query.filter_by(name="admin").first()
+        if adminRole is None:
+            adminRole = Role(name="admin")
+            db.session.add(adminRole)
+        viewRole = Role.query.filter_by(name="view").first()
+        if viewRole is None:
+            viewRole = Role(name="view")
+            db.session.add(viewRole)
+
+        user = User(username=form.username.data,email=form.email.data, userFullName=form.userFullName.data)
+        user.set_password(form.password.data)
+        if form.userType.data == "admin":
+            adminRole.users.append(user)
+        elif form.userType.data == "user":
+            userRole.users.append(user)
+        else:
+            viewRole.users.append(user)
+        
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('dash'))
+    return render_template('register.html', title='Register', form=form)
+
+
+
+@app.route("/deleteAccount/<username>")
+def deleteAccount(username):
+    userObj = User.query.filter_by(username=username).first()
+    db.session.delete(userObj)
+    db.session.commit()
+    return redirect(url_for("profile"))
+
+@app.route("/deleteQuiz/<quizName>")
+def deleteQuiz(quizName):
+    quizObj = Quiz.query.filter_by(quizName=quizName).first()
+    db.session.delete(quizObj)
+    db.session.commit()
+    return redirect(url_for("dash"))
+
+
+@app.route("/takeQuiz/<quizName>/", methods=['GET', 'POST'])
+def takeQuiz(quizName):
+    quiz = Quiz.query.filter_by(quizName=quizName).first()
+    
+
+    #Dynamically build answer form for each question type
+    for ques in range(0, len(quiz.questions)):
+        if quiz.questions[ques].quesType == "shortAns":
+            setattr(quizAttempt, "ques"+str(ques + 1), StringField("Answer:"))    
+        if quiz.questions[ques].quesType == "longAns":
+            setattr(quizAttempt, "ques"+str(ques + 1), TextAreaField("Answer:",  render_kw={"rows": 20, "cols": 50}))
+        if quiz.questions[ques].quesType == "multi":
+            optionsStr = str(quiz.questions[ques].options).replace("'","")
+            ans = str(quiz.questions[ques].answer[0])
+            optionsList = optionsStr.strip('][').split(',')
+            choices=[]
+            for elem in range(0, len(optionsList)):
+                choice = ('opt'+str(elem), optionsList[elem])
+                choices.append(choice)
+            choices.append((ans,ans))
+            random.shuffle(choices)
+            setattr(quizAttempt, "ques"+str(ques + 1), RadioField("", choices=choices))
+        if quiz.questions[ques].quesType == "fillIn":
+            for i in range(0, quiz.questions[ques].question.count("*blank*")):
+                setattr(quizAttempt, "ques"+str(ques + 1)+"b"+str(i), StringField("")) 
+
+    form = quizAttempt()
+    if form.validate_on_submit():
+        attemptNo = 1
+        
+        #check if quiz has been attempted or assign attempt no.
+        noOfAttempts = quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()
+        if noOfAttempts != 0:
+            attemptNo = noOfAttempts + 1
+        #Mark each question 
+        for ques in range(0, len(quiz.questions)):
+            #if question answer is not "None" thus a long answer question then we check if submitted answer is in answer
+            if str(quiz.questions[ques].answer[0]) != "None":
+                
+                if quiz.questions[ques].quesType == "fillIn":
+                    #build answer string
+                    ans = []
+                    for i in range(0, quiz.questions[ques].question.count("*blank*")):
+                        ans.append(form.data["ques" + str(ques+1) + "b" + str(i)])
+                    if str(ans).strip("][").replace("'", "") == str(quiz.questions[ques].answer[0]):
+                        mark = 1
+                    else: 
+                        mark = 0
+                    ansSubmitted = str(ans).strip("][")
+                else:
+                    ansSubmitted = form.data["ques" + str(ques+1)]
+                    if str(quiz.questions[ques].answer[0]) in ansSubmitted:
+                        mark = 1
+                    else:
+                        mark = 0
+                
+            else:
+                mark=None
+            
+            #Build attempt entry in quizAttempts
+            attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark, feedback=None)
+            db.session.add(attempt)
+            db.session.commit()
+        return redirect(url_for("dash"))
+
+    return render_template('quizAttempt.html', quiz=quiz, form=form)
+
+@app.route("/createQuiz", methods=['GET', 'POST'])
+def createQuiz():
+    
+
+    #get list of existing categories
     existingCategories = quizCategory.query.all()
     
     #add select field to quizCreation form with existing categories
@@ -38,13 +301,10 @@ def creation():
         for ques in form.question.data:
 
             #add options to quizQuestions table from form
-            options = []
-            listOfOptions = ["option1", "option2", "option3"]
+            options = ""
             if ques["quesType"] == "multi":
-                for optNo in listOfOptions:
-                    if ques[optNo] != "" or ques[optNo] != " ":
-                        options.append(ques[optNo])
-            options = str(options)
+                options = [ques["option1"], ques["option2"], ques["option3"]]
+                options = str(options)
 
             #ensure long answer questions have no answer attached
             if ques["quesType"] == "longAns":
@@ -56,77 +316,5 @@ def creation():
             newAnswer = quizAnswers(answer=answer, question=newQuestion,  quiz=quiz)
         db.session.commit()
         return redirect(url_for("quizView.index_view"))
-    else:
-        print(form.errors)
     
-    return render_template('create.html', form=form)
-
-@app.route('/data')
-def data():
-    
-    name, noAttempts = attempts()
-
-    return render_template('data.html', noAttempts = noAttempts, name = name)
-
-def attempts():
-    
-    names = quizCategory.query.all()
-    name = []
-    for i in names:
-        name.append(str(i))
-     
-    noAttempts = [] #list of number of attempts for each category
-    
-    for n in name:
-        quiz = Quiz.query.filter(Quiz.category.any(name=n)).all() #all the quizzes under that category
-        
-        marks = 0
-        
-        for i in quiz:
-            Attempts = quizAttempts.query.filter_by(quizAttempted=i).all() #the attempts for each quiz
-            for j in Attempts:
-                if j.mark != None:
-                    marks += j.mark
-    
-            noAttempts.append[marks]
-            
-    return name, noAttempts
-
-@app.route('/json')
-def getdata():
-    
-    values = [5,8,15]
-    labels = ["CSS","HTML","Javascript"]
-    
-    return flask.jsonify({'payload':json.dumps({'values':values, 'labels':labels})})
-    
-
-@app.route('/stats')
-def stats():
-    labels = ["html", "CSS", "Javascript"]
-    values = [5,10,15]
-   
-    return render_template('chart.html', labels = labels, values = values)
-
-
-@app.route('/htmlquiz', methods=['GET', 'POST'])
-def htmlquiz():
-    form = answer()
-    
-    return render_template('questions.html', form = form)
-
-
-@app.route('/login')
-def login():
-    name = "Caitlin"
-    return render_template('login.html', name = name)
-
-
-@app.route('/results', methods=['GET','POST'])
-def results():
-    form = quizAttempt()
-    
-    return render_template('results.html', correct = correct, form = form, name = name)
-    
-
-
+    return render_template("quizCreation.html", form=form)
