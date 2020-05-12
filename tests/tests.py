@@ -34,5 +34,20 @@ class userModelCase(TestCase):
     db.drop_all()
     self.app_context.pop()
 
+  def test_user_set_password(self):
+    mark=User()
+    mark.username='mark'
+    mark.email='mark@student.com'
+    mark.set_password('1234')
+    assert_that(type(mark.password_hash)).is_equal_to(type('abc'))
+  
+  def test_user_check_password(self):
+    mark=User()
+    mark.username='mark'
+    mark.email='mark@student.com'
+    mark.set_password('1234')
+    assert_that(mark.check_password('1234')).is_equal_to(True)
+
+  
 if __name__ == '__main__':
   unittest.main(verbosity=2)
