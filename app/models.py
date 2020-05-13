@@ -56,6 +56,14 @@ class User(UserMixin, db.Model):
         return True
       else:
         return False
+    
+    def getUserById(inputId):
+      user = User.query.filter_by(id=inputId).first()
+      if user==None:
+        print('cannot find the user with user id - ', userId)
+        return False
+      else:
+        return user
 
     @hybrid_property
     def password(self):

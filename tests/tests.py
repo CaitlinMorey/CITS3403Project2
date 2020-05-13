@@ -79,6 +79,11 @@ class userModelCase(TestCase):
     invalidUser.userFullName='userFullName'
     invalidUser.email=None
     assert_that(invalidUser.validate()).is_equal_to(False)
-     
+  
+  def test_getUserById(self):
+    inputId = 1
+    assert_that(User.getUserById(inputId).id).is_equal_to(inputId)
+
+    
 if __name__ == '__main__':
   unittest.main(verbosity=2)
