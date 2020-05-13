@@ -83,6 +83,10 @@ class userModelCase(TestCase):
   def test_getUserById(self):
     inputId = 1
     assert_that(User.getUserById(inputId).id).is_equal_to(inputId)
+  
+  def test_getUserByUserName(self):
+    inputName = 'mark'
+    assert_that(User.getUserByUserName(inputName).username).is_equal_to(inputName)
 
     
 if __name__ == '__main__':
