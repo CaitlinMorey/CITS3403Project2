@@ -55,6 +55,30 @@ class userModelCase(TestCase):
     db.session.add(mark)
     db.session.commit()
     assert_that(type(mark.get_id())).is_equal_to(type(1))
-  
+
+  def test_user_validate(self):
+    validUser=User()
+    invalidUser=User()
+    validUser.username='username'
+    validUser.userFullName = 'userFullName'
+    validUser.email='emailaddress@student.com'
+    assert_that(validUser.validate()).is_equal_to(True)
+    assert_that(invalidUser.validate()).is_equal_to(False)
+
+    invalidUser.username=None
+    invalidUser.userFullName='userFullName'
+    invalidUser.email='emailaddress@student.com'
+    assert_that(invalidUser.validate()).is_equal_to(False)
+
+    invalidUser.username='username'
+    invalidUser.userFullName=None
+    invalidUser.email='emailaddress@student.com'
+    assert_that(invalidUser.validate()).is_equal_to(False)
+
+    invalidUser.username='username'
+    invalidUser.userFullName='userFullName'
+    invalidUser.email=None
+    assert_that(invalidUser.validate()).is_equal_to(False)
+     
 if __name__ == '__main__':
   unittest.main(verbosity=2)

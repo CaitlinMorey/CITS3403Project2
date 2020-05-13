@@ -51,7 +51,11 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return 'Username: {}, Name: {}'.format(self.username, self.userFullName, self.roles) #Tells python how to print objects from this class
 
-
+    def validate(self):
+      if self.username and self.userFullName and self.email:
+        return True
+      else:
+        return False
 
     @hybrid_property
     def password(self):
