@@ -156,7 +156,8 @@ class attemptsView(ModelView):
         FilterEqual(column=User.username, name='User', options=getUserNames),
         FilterEqual(column=quizAttempts.quiz_id, name='Quiz', options=getQuizNames),
     ]
-    column_labels = {"quizAttemptNo":"Attempt No.", "ansSubmit":"Answer Submitted", "quizAttempted":"Quiz", "quesAttempted":"Question"}
+    column_list=["quizAttemptNo", "ansSubmit", "mark", "feedback", "user", "quizAttempted", "quesAttempted", "Timesubmitted"]
+    column_labels = {"quizAttemptNo":"Attempt No.", "ansSubmit":"Answer Submitted", "quizAttempted":"Quiz", "quesAttempted":"Question", "Timesubmitted":"Time Submitted"}
     can_create = False
 
     @expose('/')
