@@ -6,7 +6,7 @@
         list-style-type: none;
     }
 </style>
-<div class="jumbotron" style="text-align: center; margin-top: 5%;">
+<div class="bubble" style="text-align: center; margin-top: 5%;">
     <h2>Title : {{quiz.quizName}}</h2>
     <h3>Description: {{quiz.quizDescription}} </h3>
     <p>Good luck, {{ current_user.username }}! </p><br>
@@ -14,44 +14,51 @@
         <hr>
         <form action="" method="post">
             {{ form.hidden_tag() }}
-            
+
 
 
             {%for ques in range(1, quiz.questions|length + 1)%}
             <p>Question: {{loop.index0 + 1}}</p>
-            
-                {% if quiz.questions[ques-1].quesType == "fillIn" %}
-                {% set ns = namespace(count = 0) %}
-                    {% for word in quiz.questions[ques -1].question.split(" ") %}
 
-                        {% if "*blank*" in word %}
-                            {{form['ques' + ques|string + "b" + ns.count|string]}}
-                            {% set ns.count = ns.count + 1 %}
-                        {%else%}
-                            {{word}}
-                        {%endif%}
-                    
-                    {%endfor%}
-                    
-                    <br>
-                {% else %}
-                    {{quiz.questions[ques -1]}} <br>
-                    {{form['ques' + ques|string].label}} <br>
-                    {{form['ques' + ques|string]}} <br> 
-                {%endif%} <br>
-           
-                
-               
-            
+            {% if quiz.questions[ques-1].quesType == "fillIn" %}
+            {% set ns = namespace(count = 0) %}
+            {% for word in quiz.questions[ques -1].question.split(" ") %}
+
+            {% if "*blank*" in word %}
+                {{ word[0:word.find("*blank*")] }}
+                {{form['ques' + ques|string + "b" + ns.count|string]}}
+                {{ word[word.find("*blank*")+7:] }}
+            {% set ns.count = ns.count + 1 %}
+            {%else%}
+                {{word}}
+            {%endif%}
+
             {%endfor%}
-            {{form.submit}}
-        </form>
+
+            <br>
+            {% else %}
+            {{quiz.questions[ques -1]}} <br>
+            {{form['ques' + ques|string].label}} <br>
+            {{form['ques' + ques|string]}} <br>
+            {%endif%} <br>
+
+
+
+
+            {%endfor%}
     </div>
-
-
-
-
 </div>
+<br>
+<div class="submitQuiz">
+    {{ form.submit() }}
+</div>
+</form>
+
+
+
+
+
+
 
 <script>
 

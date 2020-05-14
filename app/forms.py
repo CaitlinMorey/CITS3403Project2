@@ -12,12 +12,12 @@ class LoginForm(FlaskForm):
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    userFullName = StringField('User Full Name', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('Username:', validators=[DataRequired()])
+    email = StringField('Email:', validators=[DataRequired(), Email()])
+    userFullName = StringField('Full Name:', validators=[DataRequired()])
+    password = PasswordField('Password:', validators=[DataRequired()])
     password2 = PasswordField(
-        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+        'Repeat Password:', validators=[DataRequired(), EqualTo('password')])
     userType = SelectField("Type", choices = [("admin", "Admin"), ("user", "User"), ("overview", "Overview")])
     submit = SubmitField('Register')
 
@@ -35,12 +35,26 @@ class RegistrationForm(FlaskForm):
 
 class quesAndAnswer(Form):
     quesType = SelectField("Type", choices = [("shortAns", "Short Answer"), ("longAns", "Long Answer"), ("multi", "Multi-Choice"), ("fillIn", "Fill-in-the-Blank")])
-    quizQuestion = StringField("Question", validators=[DataRequired()])
-    quizAnswer = StringField("Answer")
+    quizQuestion = StringField("Question: ", validators=[DataRequired()])
+    quizAnswer = StringField("Answer: ")
     option1 = StringField("Option: ")
     option2 = StringField("Option: ")
     option3 = StringField("Option: ")
     
+    def validate(self):
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+
+        if self.quesType.data == "fillIn":
+            if "*blank*" not in self.quizQuestion.data:
+                self.quizQuestion.errors += ("Fill-in-the-blank requires *blank* in the question",)
+                return False
+            elif self.quizQuestion.data.count("*blank*") != len(self.quizAnswer.data.split(",")):
+                self.quizAnswer.errors += ("Number of answers do not match number of *blank* entries in question",)
+                return False
+        return True
+        
 
 
 
@@ -49,12 +63,13 @@ class quizCreation(FlaskForm):
     quizDescription = StringField("Quiz Description: ")
     question = FieldList(FormField(quesAndAnswer), min_entries=1)
     quizCategory = StringField("New Quiz Category: ")
-    submit = SubmitField('Create')
+    submit = SubmitField('Create Quiz')
 
     def validate_quizName(self, quizName):
         quiz = Quiz.query.filter_by(quizName=quizName.data).first()
         if quiz is not None:
             raise ValidationError('Quiz Name already taken')
+
 
 class quizAttempt(FlaskForm):
     submit = SubmitField('Submit')

@@ -1,0 +1,74 @@
+{%extends "base.html"%}
+
+{% block content %}
+
+<div class="bubble">
+
+    <h3> Attempted Quiz: {{ quiz.quizName }} </h3>
+    <h5> Description: {{ quiz.quizDescription }}</h6>
+        <br>
+        <br>
+        <div class="attemptBlock is-hidden">
+            Attempt No: <select id="attemptNo">
+                {% for data in attemptsList %}
+                <option value={{data}}> {{data}} </option>
+                {% endfor %}
+            </select>
+            &emsp;Mark: <span id="attemptMark"></span>/ {{noQuizQuestions}}
+
+            {% for attempt in attempts %}
+            
+            <ul style="list-style-type:none;" class="attempt{{attempt.quizAttemptNo}}">
+                <br>
+                Time Submitted: {{ attempt.timeSubmitted }}
+                <hr>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <li> Question: {{ attempt.quesAttempted }}</li>
+                            {% if attempt.mark == 0 %}
+                            <li>&emsp;Answer: {{ attempt.quesAttempted.answer[0] }} </li>
+                            <li>&emsp;Submitted: {{ attempt.ansSubmit }} </li>
+                            {%elif attempt.mark == 1 %}
+                            <li>&emsp;Submitted: {{ attempt.ansSubmit }} </li>
+                            {% endif %}
+                            {{attempt.mark}}
+                    </div>
+
+                    <div class="col-sm-5">
+                        <p> Feedback: <br> {{attempt.feedback}}</p>
+                    </div>
+
+
+                    <div class="col-sm-2 markDisplay">
+                        {%if attempt.mark == 1 %}
+                        <span class="correct"> Correct! </span>
+                        {% elif attempt.mark == 0 %}
+                        <span class="incorrect"> Incorrect </span>
+                        {%endif%}
+                    </div>
+                </div>
+            </ul>
+            {% endfor %}
+        </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+    document.getElementById("attemptNo").onchange = function () {
+        var marks = {{ marksList|safe }};
+        $(".bubble ul:not(.attempt" + this.value + ")").addClass("is-hidden");
+        $(".attempt" + this.value).removeClass("is-hidden");
+        document.getElementById("attemptMark").innerHTML = marks[this.value-1];
+    }
+    $(document).ready(function () {
+        document.getElementById("attemptNo").value = "{{ attemptsList[-1] }}";
+        $(".bubble ul:not(.attempt{{attemptsList[-1]}})").addClass("is-hidden");
+        $(".attempt{{attemptsList[-1]}}").removeClass("is-hidden");
+        $(".attemptBlock").removeClass("is-hidden");
+        var marks = {{ marksList|safe }};
+        document.getElementById("attemptMark").innerHTML = marks[marks.length -1]
+    });
+</script>
+
+{% endblock %}
