@@ -107,19 +107,28 @@
       color: black;
     }
 
-    .submitQuiz  {
+    .submitQuiz {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-bottom: 5%;
       font-size: larger;
-      
+
+    }
+
+    .footer {
+      text-align: center;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      color: rgb(172, 172, 172);
     }
 
     .submitQuiz input {
       padding: 5px 20px 5px 20px;
       background-color: #007bff;
     }
+
     .submitQuiz input:hover {
       background-color: #0063ce;
     }
@@ -127,10 +136,32 @@
     .register input {
       padding: 5px 20px 5px 20px;
     }
+
+    .markDisplay {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100px;
+      text-align: center;
+    }
+
+    .correct {
+      padding: 10px 20px 10px 20px;
+      background-color: rgb(53, 236, 53);
+      color: white;
+      border-radius: 10px;
+    }
+
+    .incorrect {
+      padding: 10px 20px 10px 20px;
+      background-color: rgb(235, 38, 38);
+      color: white;
+      border-radius: 10px;
+    }
   </style>
 </head>
 
-<body >
+<body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <a class="navbar-brand" href="/index">CITS3403 Web Quiz<span class="sr-only">(current)</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
@@ -169,7 +200,11 @@
     </div>
   </nav>
 
-  <div class="container">
+  <div class="container" style="padding-bottom: 50px;">
     {% block content %} {% endblock %}
+  </div>
+  <div class="footer">
+    <p>Created by Mangpi Gualnam, Caitlin Morey, Jong Jang and Matthew Carter <br>CITS3403 Agile Web Development Project
+      2 </p>
   </div>
 </body>

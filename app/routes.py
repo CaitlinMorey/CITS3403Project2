@@ -11,6 +11,7 @@ from flask_login import logout_user
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import random
 
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -113,6 +114,7 @@ def deleteQuiz(quizName):
 
 
 @app.route("/takeQuiz/<quizName>/", methods=['GET', 'POST'])
+@login_required
 def takeQuiz(quizName):
     quiz = Quiz.query.filter_by(quizName=quizName).first()
     
@@ -175,11 +177,12 @@ def takeQuiz(quizName):
             attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark, feedback=None)
             db.session.add(attempt)
             db.session.commit()
-        return redirect(url_for("dash"))
+        return redirect(url_for("attemptView", quizAttemptView=quiz))
 
     return render_template('quizAttempt.html', quiz=quiz, form=form)
 
 @app.route("/createQuiz", methods=['GET', 'POST'])
+@login_required
 def createQuiz():
     
 
@@ -209,8 +212,6 @@ def createQuiz():
 
         quiz = Quiz(quizName=form.quizName.data, quizDescription=form.quizDescription.data, author=current_user, category=dbCategory)
         
-        # dbCategory.quizzes.append(quiz) #potentially need to change if existing category is selected.
-        
         for ques in form.question.data:
 
             #add options to quizQuestions table from form
@@ -236,5 +237,29 @@ def createQuiz():
         print(form.errors)
     return render_template("quizCreation.html", form=form)
 
+
+@app.route("/attemptView/<quizAttemptView>", methods=['GET', 'POST'])
+@login_required
+def attemptView(quizAttemptView):
+
+    quiz = Quiz.query.filter_by(quizName=quizAttemptView).first()
+
+    attempts = quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).all()
+    attemptsList = []
+    for attempt in attempts:
+        if attempt.quizAttemptNo not in attemptsList:
+            attemptsList.append(attempt.quizAttemptNo)
+        else:
+            continue
+    
+    marksList = [0]*len(attemptsList)
+    for attemptNo in attemptsList:
+        for attempt in attempts:
+            if attempt.quizAttemptNo == attemptNo:
+                marksList[attemptNo-1] += attempt.mark
+            else:
+                continue
+    noQuizQuestions = len(quiz.questions)
+    return render_template("attemptsView.html", attempts=attempts, quiz=quiz, attemptsList=attemptsList, quizAttempts=quizAttempts, marksList=marksList, noQuizQuestions=noQuizQuestions)
 
 

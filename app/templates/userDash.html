@@ -7,42 +7,56 @@
     <p>Welcome, {{ current_user.username }}!<br>
         <br>
         <h4>Quizzes</h4>
-        
+
         Category: <select id="categorySelected">
             <option value="all">All</option>
-        {% for data in existingCategories %}
+            {% for data in existingCategories %}
             <option value={{data}}> {{data}} </option>
-        {% endfor %}
+            {% endfor %}
         </select>
-        <hr>
-        <br>
-            {%for quiz in quizzes:%}
-            <ul style="list-style-type:none; text-align: left;" class={{quiz.category}}>
-                <li style="font-size: larger;">{{quiz.quizName}} </li>
-                <li>Description: {{quiz.quizDescription}} </li>
-                <li>Category: {{quiz.category}} </li>
-                
-                {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).first() != None %}
-                <li> Avg Mark:  {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}  % </li>                
-                {%endif%}
 
-                {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() != 0 %}
-                <li>No of Attempts: {{(quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()) | int}}</li>
-                {%endif%}
-                <li><a class="remove" href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
-                <br>
-                <br>
-                <hr>
-            </ul>
-            {%endfor%}
-        </p>
-    </div>    
+        <br>
+        {%for quiz in quizzes:%}
+        
+        <ul style="list-style-type:none; text-align: left;" class={{quiz.category}}>
+            <hr>
+            <div class="row" style="min-height: 100px;">
+                <div class="col-sm">
+                    <li style="font-size: larger;">{{quiz.quizName}} </li>
+                    <li>Description: {{quiz.quizDescription}} </li>
+                    <li>Category: {{quiz.category}} </li>
+
+                    {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).first() != None %}
+                    <li> Avg Mark:
+                        {{ ((quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}
+                        % </li>
+                    {%endif%}
+
+                    {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() != 0 %}
+                    <li>No of Attempts:
+                        {{(quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() / quizQuestions.query.filter_by(quiz=quiz).count()) | int}}
+                    </li>
+                    {%endif%}
+                </div>
+                <div class="col-sm">
+                    <br>
+                    <br>
+                    {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() != 0 %}
+                    <li><a class="remove" href="{{ url_for('attemptView', quizAttemptView=quiz)}}"
+                            style="color: black;">View Attempts</a></li> <br> <br>
+                    {%endif%}
+
+                    <li><a class="remove" href="{{ url_for('takeQuiz', quizName=quiz) }}"> Attempt </a></li>
+                </div>
+
+
+            </div>
+        </ul>
+        {%endfor%}
+    </p>
+</div>
 <br>
-<style>
-    .is-hidden {
-        display: none;
-    }
-</style>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
@@ -51,8 +65,8 @@
         if (this.value == "all") {
             $(".bubble ul").removeClass("is-hidden");
         } else {
-        $(".bubble ul:not(."+this.value+")").addClass("is-hidden");
-        $("."+this.value).removeClass("is-hidden");  
+            $(".bubble ul:not(." + this.value + ")").addClass("is-hidden");
+            $("." + this.value).removeClass("is-hidden");
         }
     }
 </script>
