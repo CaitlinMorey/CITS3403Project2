@@ -18,14 +18,13 @@ def index():
 
 
 @app.route('/stats')
-#@login_required
+@login_required
 def stats():
     
-    #name = names()
-    #noMarks, avMarks = marks()
-    #noAttempts = attempts()
-
-    return render_template('stats.html')# noAttempts = noAttempts, name = name, noMarks = noMarks, avMarks = avMarks)
+    name = names()
+    noMarks, avMarks = marks()
+    noAttempts = attempts()
+    return render_template("stats.html", noAttempts=noAttempts, name=name, noMarks=noMarks, avMarks=avMarks)
 
 
 def names():
@@ -41,38 +40,33 @@ def marks():
     
     name = names()
      
-    noMarks = [] #list of number of attempts for each category
-    averages = []
+    noMarks = [] #total marks
+    avMarks = [] #average marks
     
     for n in name:
         quiz = Quiz.query.filter(Quiz.category.any(name=n)).all() #all the quizzes under that category
         
-        count = 0
-        marks = 0
-        
+        totalMarks = 0
+        totalCount = 0
         for i in quiz:
-
-            Attempts = quizAttempts.query.filter_by(quizAttempted=i).all() #the attempts for each quiz
-            for j in Attempts:
-                
-                if j.mark >= 1:    #if j.mark != None: 
-                    count += 1
-                    marks += j.mark
-    
-            noMarks.append(marks)
-            averages.append(findAv)
-    
-    avMarks = []
-    
-    for i in range(len(noMarks)):
-        if noMarks[i] == 0:
-            av = 0
-            avMarks.append(av)
+            #all correct marks for each quiz
+            marks = quizAttempts.query.filter_by(quizAttempted=i).filter(quizAttempts.mark >= 1).count()
+            totalMarks += marks
+            #all marks for each quiz
+            count = quizAttempts.query.filter_by(quizAttempted=i).filter(quizAttempts.mark != None).count()
+            totalCount += count
+        #calculating averages
+        if totalMarks != 0:
+            av = (float(totalMarks)/totalCount)*100
         else:
-            av = noMarks[i]/findAv[i]
-            avMarks.append(av)
+            av = 0
+        
+        av = float("{:.2f}".format(av))
+        avMarks.append(av)
+        noMarks.append(totalMarks)
             
-    return noMarks, avMarks
+    return (noMarks, avMarks)
+
 
 def attempts():
     
@@ -82,18 +76,16 @@ def attempts():
     
     for n in name:
         quiz = Quiz.query.filter(Quiz.category.any(name=n)).all() #all the quizzes under that category
-        
         marks = 0
-        
+        #attempts for each quiz
         for i in quiz:
-            Attempts = quizAttempts.query.filter_by(quizAttempted=i).all() #the marks for each quiz
-            for j in Attempts:
-                if j.quizAttemptNo != None:
-                    marks += j.quizAttemptNo
-    
-            noAttempts.append[marks]
-            
-    return noAttempts
+            Attempts = quizAttempts.query.filter_by(quizAttempted=i).count()
+            marks += Attempts
+        
+        noAttempts.append(marks) 
+        
+     return(noAttempts)
+
 
 def usermarks():
     u = User(username=form.username.data)
