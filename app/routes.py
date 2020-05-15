@@ -132,7 +132,8 @@ def takeQuiz(quizName):
             optionsList = optionsStr.strip('][').split(',')
             choices=[]
             for elem in range(0, len(optionsList)):
-                choice = ('opt'+str(elem), optionsList[elem])
+                # choice = ('opt'+str(elem), optionsList[elem])
+                choice = (optionsList[elem], optionsList[elem])
                 choices.append(choice)
             choices.append((ans,ans))
             random.shuffle(choices)
@@ -165,7 +166,6 @@ def takeQuiz(quizName):
                         mark = 0
                     ansSubmitted = str(ans).strip("][")
                 else:
-                    
                     ansSubmitted = form.data["ques" + str(ques+1)]
                     if str(quiz.questions[ques].answer[0]) in ansSubmitted:
                         mark = 1
