@@ -13,5 +13,5 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 admin = Admin(app, base_template="master.html")
-
+db.create_all()
 from app import routes, models

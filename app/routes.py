@@ -12,6 +12,7 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import random
 
 
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -164,6 +165,7 @@ def takeQuiz(quizName):
                         mark = 0
                     ansSubmitted = str(ans).strip("][")
                 else:
+                    
                     ansSubmitted = form.data["ques" + str(ques+1)]
                     if str(quiz.questions[ques].answer[0]) in ansSubmitted:
                         mark = 1
@@ -172,7 +174,6 @@ def takeQuiz(quizName):
                 
             else:
                 mark=None
-            
             #Build attempt entry in quizAttempts
             attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark, feedback=None)
             db.session.add(attempt)
@@ -222,6 +223,8 @@ def createQuiz():
                     if ques[optNo] != "" or ques[optNo] != " ":
                         options.append(ques[optNo])
             options = str(options)
+            if options == "[]":
+                options = None
 
             #ensure long answer questions have no answer attached
             if ques["quesType"] == "longAns":
@@ -260,6 +263,7 @@ def attemptView(quizAttemptView):
             else:
                 continue
     noQuizQuestions = len(quiz.questions)
+    
     return render_template("attemptsView.html", attempts=attempts, quiz=quiz, attemptsList=attemptsList, quizAttempts=quizAttempts, marksList=marksList, noQuizQuestions=noQuizQuestions)
 
 
