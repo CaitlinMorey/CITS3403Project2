@@ -7,13 +7,12 @@
     <div>
         <button>Average Marks</button>
         <button>Average Attempts</button>
-        <button>Average time spent on</button>
     </div>
     <div style= "height: 500; width: 500;">
         <canvas id="barGraph" style="background-color:rgb(231, 228, 228); padding: 10px; margin: 10px;"></canvas>
     </div>
 
-    <p>{{ noAttempts }}, {{ noMarks }}, {{ avMarks }} and {{ name }}</p>
+    <p>attempts = {{ noAttempts }}, marks = {{ noMarks }}, av = {{ avMarks }}, names = {{ name }}</p>
 
     <script src="static/Chart.js"></script>
 </body>
