@@ -88,6 +88,8 @@ class userModelCase(TestCase):
     inputName = 'mark'
     assert_that(User.getUserByUserName(inputName).username).is_equal_to(inputName)
 
+  def test_numberOfUsers(self):
+    self.assertEqual(len(User.getAllUsers()), len(User.query.all())) 
     
 if __name__ == '__main__':
   unittest.main(verbosity=2)

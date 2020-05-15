@@ -72,6 +72,9 @@ class User(UserMixin, db.Model):
         return False
       else:
         return userName
+    
+    def getAllUsers():
+      return User.query.all()
 
     @hybrid_property
     def password(self):
