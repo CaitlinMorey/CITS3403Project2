@@ -42,7 +42,7 @@
                     <br>
                     <br>
                     {%if quizAttempts.query.filter_by(user=current_user).filter_by(quizAttempted=quiz).count() != 0 %}
-                    <li><a class="remove" href="{{ url_for('attemptView', quizAttemptView=quiz)}}"
+                    <li><a class="remove" href="{{ url_for('viewAttempt', quizAttemptView=quiz)}}"
                             style="color: black;">View Attempts</a></li> <br> <br>
                     {%endif%}
 
@@ -55,7 +55,7 @@
         {%endfor%}
     </p>
 </div>
-<br>
+
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

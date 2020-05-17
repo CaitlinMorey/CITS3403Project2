@@ -9,18 +9,23 @@
         <br>
         <br>
         <div class="attemptBlock is-hidden">
+            <p style="font-size:xx-large">Score: <span id="attemptPercent"></span>%</p>
+            <p style="font-size:medium">Mark: <span id="attemptMark"></span>/ {{noQuizQuestions}}</p>
+            <br>
             Attempt No: <select id="attemptNo">
                 {% for data in attemptsList %}
                 <option value={{data}}> {{data}} </option>
                 {% endfor %}
             </select>
-            &emsp;Mark: <span id="attemptMark"></span>/ {{noQuizQuestions}}
+            
 
             {% for attempt in attempts %}
             
             <ul style="list-style-type:none;" class="attempt{{attempt.quizAttemptNo}}">
                 <br>
-                Time Submitted: {{ attempt.timeSubmitted }}
+                {%if loop.index0 % noQuizQuestions == 0%}
+                    Time Submitted: {{ attempt.timeSubmitted }}
+                {%endif%}
                 <hr>
                 <div class="row">
                     <div class="col-sm-5">
@@ -54,19 +59,31 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <script>
+    function getMark (num) {
+        if (num == 100) {
+            return num;
+        } else {
+            return num.toFixed(2);
+        }
+    };
     document.getElementById("attemptNo").onchange = function () {
         var marks = {{ marksList|safe }};
         $(".bubble ul:not(.attempt" + this.value + ")").addClass("is-hidden");
         $(".attempt" + this.value).removeClass("is-hidden");
         document.getElementById("attemptMark").innerHTML = marks[this.value-1];
-    }
+        var num = marks[this.value -1]/ {{noQuizQuestions}} * 100;
+        document.getElementById("attemptPercent").innerHTML = getMark(num);
+       
+    };
     $(document).ready(function () {
         document.getElementById("attemptNo").value = "{{ attemptsList[-1] }}";
         $(".bubble ul:not(.attempt{{attemptsList[-1]}})").addClass("is-hidden");
         $(".attempt{{attemptsList[-1]}}").removeClass("is-hidden");
         $(".attemptBlock").removeClass("is-hidden");
         var marks = {{ marksList|safe }};
-        document.getElementById("attemptMark").innerHTML = marks[marks.length -1]
+        document.getElementById("attemptMark").innerHTML = marks[marks.length -1];
+        var num = marks[marks.length -1]/ {{noQuizQuestions}} * 100;
+        document.getElementById("attemptPercent").innerHTML = getMark(num);
     });
 </script>
 

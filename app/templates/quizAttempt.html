@@ -26,33 +26,43 @@
 
                         {% if "*blank*" in word %}
                             {{ word[0:word.find("*blank*")] }}
+
                             {{form['ques' + ques|string + "b" + ns.count|string]}}
+
                             {{ word[word.find("*blank*")+7:] }}
                             {% set ns.count = ns.count + 1 %}
                         {%else%}
                             {{word}}
                         {%endif%}
-                    {%endfor%}
-
+                    {% endfor %}
+                   
                 <br>
                 {% else %}
-                test
+
                     {{quiz.questions[ques -1]}} <br>
-                    {{form['ques' + ques|string].label}} <br>
-                    {{form['ques' + ques|string]}} <br>
+                    {{form['ques' + ques|string].label|string}} <br>
+                    {{form['ques' + ques|string]|string}} <br>
+
+                    {% for error in form['ques' + ques|string].errors %}
+                    <span style="font-size: small;color: yellow;">{{ error | string }}</span><br>
+                    {% endfor %}
+
                 {%endif%} <br>
+                
+                
 
 
 
 
             {%endfor%}
     </div>
-</div>
+
 <br>
 <div class="submitQuiz">
     {{ form.submit() }}
 </div>
 </form>
+</div>
 
 
 

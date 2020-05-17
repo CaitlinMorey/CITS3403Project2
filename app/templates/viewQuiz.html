@@ -1,0 +1,37 @@
+{%extends "base.html"%}
+
+{%block content%}
+<style>
+    ul {
+        list-style-type: none;
+    }
+</style>
+<div class="bubble" style="text-align: center; margin-top: 5%;">
+    <h2>Title : {{quiz.quizName}}</h2>
+    <h3>Description: {{quiz.quizDescription}} </h3>
+    <p> </p><br>
+    <div style="text-align: left;">
+        {%for ques in quiz.questions%}
+            <hr>
+            <p>Question: {{ loop.index0 + 1}}<br> {{ques.question}}<br>
+            {%if ques.quesType == "multi"%}
+                {%set list = ques.options.strip("][").split(",") %}
+                Options:
+                {% for opt in list %}
+                    {{opt}}
+                {%endfor%}
+                <br>
+            {%endif%}
+            Answer: {{ques.answer[0]}}</p>
+            
+        {%endfor%}
+        <br>
+    </div>
+</div>
+<br>
+
+
+
+
+
+{%endblock%}

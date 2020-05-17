@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return 'Username: {}, Name: {}'.format(self.username, self.userFullName, self.roles) #Tells python how to print objects from this class
+        return '{}'.format(self.username) #Tells python how to print objects from this class
 
 
     #For flask admin user creation
@@ -169,6 +169,7 @@ class AnswerView(ModelView):
     can_create = False
    
 class questionView(ModelView):
+    column_labels = {"quesType":"Type"}
     can_create = False
 
 

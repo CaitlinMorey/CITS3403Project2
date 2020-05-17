@@ -1,0 +1,117 @@
+{%extends "base.html"%}
+
+{%block content%}
+<style>
+    ul {
+        list-style-type: none;
+    }
+</style>
+<div class="bubble" style="text-align: center; margin-top: 5%;">
+    <h1>Quiz Attempts View </h1>
+    <h2>Title : {{quiz.quizName}}</h2>
+    <h3>Description: {{quiz.quizDescription}} </h3>
+    <p> </p><br>
+    User: <select id="userSelected">
+        <option value="all">All</option>
+        {% for data in userList  %}
+        {% if data != "maxAttempts"%}
+        <option value={{data}}> {{data}} </option>
+        {%endif%}
+        {% endfor %}
+    </select>
+
+    Attempt No: <select id="attemptNo">
+    </select>
+
+    <div id="attemptsBlock" style="text-align: left;" class="is-hidden">
+        {%for attempt in attempts%}
+
+        <ul class="{{attempt.user}} atmp{{attempt.quizAttemptNo}}">
+            {% if loop.index0 % attempt.quizAttempted.questions|length == 0 %}
+            <br>
+            <br>
+            <li> Attempt {{ attempt.quizAttemptNo}} </li>
+            <li> User: {{attempt.user}} </li>
+            {% endif %}
+            <hr>
+            <div class="row">
+                <div class="col-md">
+                    <li>Question: {{loop.index0 % attempt.quizAttempted.questions|length +1}}</li>
+                    <li>{{attempt.quesAttempted}}</li>
+                    {% if attempt.mark == 0 %}
+                    <li>&emsp;Answer: {{ attempt.quesAttempted.answer[0] }} </li>
+                    <li>&emsp;Submitted: {{ attempt.ansSubmit }} </li>
+                    {%elif attempt.mark == 1 %}
+                    <li>&emsp;Submitted: {{ attempt.ansSubmit }} </li>
+                    {% endif %}
+                    <li></li>
+                    <li></li>
+
+                </div>
+                <div class="col-md markDisplay">
+                    {%if attempt.mark == 1 %}
+                    <span class="correct"> Correct! </span>
+                    {% elif attempt.mark == 0 %}
+                    <span class="incorrect"> Incorrect </span>
+                    {%endif%}
+                </div>
+            </div>
+        </ul>
+        {%endfor%}
+        <br>
+    </div>
+</div>
+<br>
+
+
+
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+    function getAttemptNos(user) {
+        var userList = {{ userList| safe
+    }};
+    var attemptsNo = userList[user];
+    var str = "<option value='all'>All</option>"
+    for (i = 1; i < attemptsNo + 1; i++) {
+        str += "<option>" + i + "</option>"
+    };
+    document.getElementById("attemptNo").innerHTML = str;   
+        
+    };
+    document.getElementById("userSelected").onchange = function () {
+        if (this.value == "all") {
+            getAttemptNos("maxAttempts");
+            $(".bubble ul").removeClass("is-hidden");
+        } else {
+            $(".bubble ul:not(." + this.value + ")").addClass("is-hidden");
+            $("." + this.value).removeClass("is-hidden");
+            getAttemptNos(this.value)
+            $(".bubble ul:not(." + this.value + ")").addClass("is-hidden");
+        };
+    }
+    document.getElementById("attemptNo").onchange = function () {
+        if (this.value == "all") {
+            $(".bubble ul").removeClass("is-hidden")
+            var user = document.getElementById("userSelected").value;
+            $(".bubble ul:not(." + user + ")").addClass("is-hidden");
+        } else {
+            $(".bubble ul:not(.atmp" + this.value + ")").addClass("is-hidden");
+            $(".atmp" + this.value).removeClass("is-hidden");
+            var user = document.getElementById("userSelected").value;
+            if (user != "all") {
+                $(".bubble ul:not(." + user + ")").addClass("is-hidden");
+            }
+        }
+    };
+
+    $(document).ready(function () {
+        getAttemptNos("maxAttempts");
+        $("#attemptsBlock").removeClass("is-hidden");
+    });
+</script>
+{%endblock%}

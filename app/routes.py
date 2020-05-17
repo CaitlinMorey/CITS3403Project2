@@ -10,7 +10,7 @@ from app.forms import *
 from flask_login import logout_user
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import random
-
+import html
 
 
 @app.route('/')
@@ -51,9 +51,9 @@ def dash():
     if str(current_user.roles) == "[admin]":
         return redirect("admin")
     elif str(current_user.roles) == "[user]":
-        return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories )
+        return render_template("userDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories)
     else:
-        return render_template("viewDash.html", quizzes=quizzes)
+        return render_template("viewDash.html", quizzes=quizzes, quizAttempts=quizAttempts, quizQuestions=quizQuestions, existingCategories=existingCategories)
 
 
 @app.route("/profile")
@@ -123,24 +123,24 @@ def takeQuiz(quizName):
     #Dynamically build answer form for each question type
     for ques in range(0, len(quiz.questions)):
         if quiz.questions[ques].quesType == "shortAns":
-            setattr(quizAttempt, "ques"+str(ques + 1), StringField("Answer:"))    
+            setattr(quizAttempt, "ques"+str(ques + 1), StringField("Answer:", [DataRequired()]))    
         if quiz.questions[ques].quesType == "longAns":
-            setattr(quizAttempt, "ques"+str(ques + 1), TextAreaField("Answer:",  render_kw={"rows": 20, "cols": 50}))
+            setattr(quizAttempt, "ques"+str(ques + 1), TextAreaField("Answer:", [DataRequired()], render_kw={"rows": 20, "cols": 50}))
         if quiz.questions[ques].quesType == "multi":
             optionsStr = str(quiz.questions[ques].options).replace("'","")
             ans = str(quiz.questions[ques].answer[0])
             optionsList = optionsStr.strip('][').split(',')
             choices=[]
             for elem in range(0, len(optionsList)):
-                # choice = ('opt'+str(elem), optionsList[elem])
-                choice = (optionsList[elem], optionsList[elem])
-                choices.append(choice)
-            choices.append((ans,ans))
+                if optionsList[elem].strip() != "":
+                    choice = (optionsList[elem], html.escape(optionsList[elem]))
+                    choices.append(choice)
+            choices.append((ans,html.escape(ans)))
             random.shuffle(choices)
-            setattr(quizAttempt, "ques"+str(ques + 1), RadioField("", choices=choices))
+            setattr(quizAttempt, "ques"+str(ques + 1), RadioField("", [DataRequired()], choices=choices))
         if quiz.questions[ques].quesType == "fillIn":
             for i in range(0, quiz.questions[ques].question.count("*blank*")):
-                setattr(quizAttempt, "ques"+str(ques + 1)+"b"+str(i), StringField("")) 
+                setattr(quizAttempt, "ques"+str(ques + 1)+"b"+str(i), StringField("", [DataRequired()])) 
 
     form = quizAttempt()
     if form.validate_on_submit():
@@ -178,7 +178,7 @@ def takeQuiz(quizName):
             attempt = quizAttempts(user=current_user, quizAttempted=quiz, quesAttempted=quiz.questions[ques], quizAttemptNo=attemptNo, ansSubmit=ansSubmitted, mark=mark, feedback=None)
             db.session.add(attempt)
             db.session.commit()
-        return redirect(url_for("attemptView", quizAttemptView=quiz))
+        return redirect(url_for("viewAttempt", quizAttemptView=quiz))
 
     return render_template('quizAttempt.html', quiz=quiz, form=form)
 
@@ -186,7 +186,6 @@ def takeQuiz(quizName):
 @login_required
 def createQuiz():
     
-
     #get list of existing categories
     existingCategories = quizCategory.query.all()
     
@@ -220,7 +219,7 @@ def createQuiz():
             listOfOptions = ["option1", "option2", "option3"]
             if ques["quesType"] == "multi":
                 for optNo in listOfOptions:
-                    if ques[optNo] != "" or ques[optNo] != " ":
+                    if ques[optNo] != "" and ques[optNo] != " ":
                         options.append(ques[optNo])
             options = str(options)
             if options == "[]":
@@ -241,9 +240,9 @@ def createQuiz():
     return render_template("quizCreation.html", form=form)
 
 
-@app.route("/attemptView/<quizAttemptView>", methods=['GET', 'POST'])
+@app.route("/viewAttempt/<quizAttemptView>", methods=['GET', 'POST'])
 @login_required
-def attemptView(quizAttemptView):
+def viewAttempt(quizAttemptView):
 
     quiz = Quiz.query.filter_by(quizName=quizAttemptView).first()
 
@@ -264,6 +263,31 @@ def attemptView(quizAttemptView):
                 continue
     noQuizQuestions = len(quiz.questions)
     
-    return render_template("attemptsView.html", attempts=attempts, quiz=quiz, attemptsList=attemptsList, quizAttempts=quizAttempts, marksList=marksList, noQuizQuestions=noQuizQuestions)
+    return render_template("viewAttempt.html", attempts=attempts, quiz=quiz, attemptsList=attemptsList, quizAttempts=quizAttempts, marksList=marksList, noQuizQuestions=noQuizQuestions)
 
+@app.route("/viewQuiz/<quizViewName>")
+@login_required
+def viewQuiz(quizViewName):
+    quiz = Quiz.query.filter_by(quizName=quizViewName).first()
+    return render_template("viewQuiz.html", quiz=quiz)
 
+@app.route("/viewAllAttempts/<quizAllAttemptView>")
+@login_required
+def viewAllAttempts(quizAllAttemptView):
+    quiz = Quiz.query.filter_by(quizName=quizAllAttemptView).first()
+    attempts = quizAttempts.query.filter_by(quizAttempted=quiz).all()
+    userList = {}
+    maxAttempts = 0
+    for attempt in attempts:
+        if attempt.user not in userList:
+            user = User.query.filter_by(username=str(attempt.user)).first()
+            noUserAttempts = int(quizAttempts.query.filter_by(quizAttempted=quiz).filter_by(user=user).count() / len(quiz.questions))
+            userList[attempt.user] = noUserAttempts
+            if noUserAttempts > maxAttempts:
+                maxAttempts = noUserAttempts
+        else:
+            continue
+    userList["maxAttempts"] = maxAttempts
+    print(userList)
+    return render_template("viewAllAttempts.html", attempts=attempts, quiz=quiz, userList=userList, maxAttempts=maxAttempts)
+    

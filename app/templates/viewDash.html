@@ -2,32 +2,66 @@
 
 {%block content%}
 
-<div class="jumbotron" style="text-align: center; margin-top: 5%;">
-    <h1> This is the Overview Dashboard </h1>
+<div class="bubble">
+    <h1> Dashboard </h1>
     <p>Welcome, {{ current_user.username }}!<br>
+        <br>
+        <h4>Quizzes</h4>
+
+        Category: <select id="categorySelected">
+            <option value="all">All</option>
+            {% for data in existingCategories %}
+            <option value={{data}}> {{data}} </option>
+            {% endfor %}
+        </select>
 
         <br>
+        {%for quiz in quizzes:%}
         
-        <h4>Quizzes</h4>
-        <ul style="list-style-type:none; text-align: left;">
-            {%for quiz in quizzes:%}
-            <li>Title : {{quiz.quizName}} </li>
-            <li>Description: {{quiz.quizDescription}} </li>
-            <li>Questions:</li>
-            <ul>
-                {%for question in quiz.questions%}
-                <li>Question: {{question}} </li>
-                <li>Answer: {{question.answer}}
-                {%endfor%}
-            </ul>
-            {%endfor%}
+        <ul style="list-style-type:none; text-align: left;" class={{quiz.category}}>
+            <hr>
+            <div class="row" style="min-height: 100px;">
+                <div class="col-sm">
+                    <li style="font-size: larger;">{{quiz.quizName}} </li>
+                    <li>Description: {{quiz.quizDescription}} </li>
+                    <li>Category: {{quiz.category}} </li>
+
+                    {%if quizAttempts.query.filter_by(quizAttempted=quiz).first() != None %}
+                    <li> Avg Mark:
+                        {{ ((quizAttempts.query.filter_by(quizAttempted=quiz).filter(quizAttempts.mark >= 1).count() / quizAttempts.query.filter_by(quizAttempted=quiz).filter(quizAttempts.mark != None).count() )* 100 )| round}}
+                        % </li>
+                    {%endif%}
+
+                </div>
+                <div class="col-sm">
+                    <br>
+                    <br>
+                    {%if quizAttempts.query.filter_by(quizAttempted=quiz).count() != 0 %}
+                    <li><a class="remove" href="{{ url_for('viewAllAttempts', quizAllAttemptView=quiz)}}"
+                            style="color: black;">View Attempts</a></li> <br> <br>
+                    {%endif%}
+
+                    <li><a class="remove" href="{{ url_for('viewQuiz', quizViewName=quiz) }}"> View Questions </a></li>
+                </div>
+
+
+            </div>
         </ul>
-        <br>
-        <hr>    
-        <a href="{{ url_for('profile')}}"> Profile </a>
+        {%endfor%}
     </p>
-    
-    
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+    document.getElementById("categorySelected").onchange = function () {
+        if (this.value == "all") {
+            $(".bubble ul").removeClass("is-hidden");
+        } else {
+            $(".bubble ul:not(." + this.value + ")").addClass("is-hidden");
+            $("." + this.value).removeClass("is-hidden");
+        }
+    }
+</script>
 
 {%endblock%}
