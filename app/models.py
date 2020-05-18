@@ -32,11 +32,42 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_id(self):
+        return (self.id)
+
     def __repr__(self):
         return 'Username: {}, Name: {}'.format(self.username, self.userFullName, self.roles) #Tells python how to print objects from this class
 
+<<<<<<< HEAD
 
     #For flask admin user creation
+=======
+    def validate(self):
+      if self.username and self.userFullName and self.email:
+        return True
+      else:
+        return False
+    
+    def getUserById(inputId):
+      user = User.query.filter_by(id=inputId).first()
+      if user==None:
+        print('cannot find the user with user id - ', userId)
+        return False
+      else:
+        return user
+    
+    def getUserByUserName(inputName):
+      userName = User.query.filter_by(username=inputName).first()
+      if userName==None:
+        print('cannot find the user with username - ', inputName)
+        return False
+      else:
+        return userName
+    
+    def getAllUsers():
+      return User.query.all()
+
+>>>>>>> 6e96e8fd7d64cef69b41c75ef4d2c9d9f155091f
     @hybrid_property
     def password(self):
         return self.password_hash
