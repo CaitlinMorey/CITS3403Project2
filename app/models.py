@@ -8,6 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.base import MenuLink
 from sqlalchemy.ext.hybrid import hybrid_property
 from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual, FilterLike, FilterInList
+from app import db
 
 userRoles =db.Table("userRoles",
             db.Column("user_id", db.Integer(), db.ForeignKey("user.id")),
@@ -92,13 +93,21 @@ class quizQuestions(db.Model):
     question = db.Column(db.String(128))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     quesType = db.Column(db.String(10))
-    options = db.Column(db.String(128))
 
+    options = db.relationship("quesOptions", backref='question', uselist=False)
     answer = db.relationship('quizAnswers', backref='question', cascade="all, delete-orphan")
     quesAttempt = db.relationship('quizAttempts', backref='quesAttempted', lazy='dynamic',  cascade="all, delete-orphan")
 
     def __repr__ (self):
         return '{}'.format(self.question)
+
+class quesOptions(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    options = db.Column(db.String(512))
+    quest_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'))
+
+    def __repr__ (self):
+        return '{}'.format(self.options)
 
 class quizAnswers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -123,7 +132,7 @@ class quizAttempts(db.Model):
         return '{}'.format(self.ansSubmit)
 
 
-
+db.create_all()
 
 def getUserNames():
     uniqueUserNames = User.query.filter(User.roles.any(name="user")).all()
@@ -156,8 +165,8 @@ class attemptsView(ModelView):
         FilterEqual(column=User.username, name='User', options=getUserNames),
         FilterEqual(column=quizAttempts.quiz_id, name='Quiz', options=getQuizNames),
     ]
-    column_list=["quizAttemptNo", "ansSubmit", "mark", "feedback", "user", "quizAttempted", "quesAttempted", "Timesubmitted"]
-    column_labels = {"quizAttemptNo":"Attempt No.", "ansSubmit":"Answer Submitted", "quizAttempted":"Quiz", "quesAttempted":"Question", "Timesubmitted":"Time Submitted"}
+    column_list=["quizAttemptNo", "ansSubmit", "mark", "feedback", "user", "quizAttempted", "quesAttempted", "timeSubmitted"]
+    column_labels = {"quizAttemptNo":"Attempt No.", "ansSubmit":"Answer Submitted", "quizAttempted":"Quiz", "quesAttempted":"Question", "timeSubmitted":"Time Submitted"}
     can_create = False
 
     @expose('/')
@@ -169,6 +178,7 @@ class AnswerView(ModelView):
     can_create = False
    
 class questionView(ModelView):
+    column_list = ["question", "quesType", "options", "quiz"]
     column_labels = {"quesType":"Type"}
     can_create = False
 
